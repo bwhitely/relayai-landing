@@ -958,10 +958,31 @@
           message: message
         };
 
-        console.log('Form submission:', data);
+        var submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
 
-        form.style.display = 'none';
-        successMsg.classList.add('visible');
+        fetch('https://formsubmit.co/ajax/bwhitely@live.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(data)
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
+          if (result.success) {
+            form.style.display = 'none';
+            successMsg.classList.add('visible');
+          } else {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Message';
+            alert('Something went wrong. Please try again or email us directly at hello@relayai.com.au');
+          }
+        })
+        .catch(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send Message';
+          alert('Something went wrong. Please try again or email us directly at hello@relayai.com.au');
+        });
       });
 
       // Clear individual errors on input
