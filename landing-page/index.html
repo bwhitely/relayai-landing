@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RelayAI — Your Business, Running While You Sleep</title>
+  <meta name="description" content="Custom AI agents built for Australian small businesses. We integrate intelligent automation into your existing tools — tailored to how your business actually works.">
+  <meta property="og:title" content="RelayAI — Your Business, Running While You Sleep">
+  <meta property="og:description" content="Custom AI agents built for Australian small businesses. Tailored automation that plugs into your existing tools and workflows.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_AU">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #111113;
+      --bg-elevated: #1a1a1e;
+      --bg-card: #1e1e22;
+      --text: #e8e6e3;
+      --text-muted: #9a9898;
+      --accent: #d4952a;
+      --accent-glow: rgba(212, 149, 42, 0.25);
+      --accent-hover: #e5a83a;
+      --border: #2a2a2e;
+      --font-display: 'Clash Display', sans-serif;
+      --font-body: 'Switzer', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ---- NAV ---- */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(17, 17, 19, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      transition: padding 0.3s ease;
+    }
+
+    nav.scrolled {
+      padding: 0.6rem 1.5rem;
+    }
+
+    .nav-wordmark {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-wordmark span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: none;
+      list-style: none;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      color: var(--accent) !important;
+      font-weight: 600 !important;
+    }
+
+    .nav-cta:hover {
+      color: var(--accent-hover) !important;
+    }
+
+    .nav-toggle {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .nav-toggle.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .nav-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .nav-toggle.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 99;
+      background: rgba(17, 17, 19, 0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .mobile-menu.open {
+      display: flex;
+    }
+
+    .mobile-menu a {
+      color: var(--text);
+      text-decoration: none;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+      }
+
+      .nav-toggle {
+        display: none;
+      }
+    }
+
+    /* ---- LAYOUT ---- */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    section {
+      padding: 5rem 0;
+    }
+
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 1rem;
+    }
+
+    .section-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 540px;
+      line-height: 1.7;
+    }
+
+    /* ---- HERO ---- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding-top: 5rem;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+      max-width: 700px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--bg);
+      background: var(--accent);
+      padding: 0.85rem 2rem;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* ---- HOW IT WORKS ---- */
+    #how-it-works {
+      border-top: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+    }
+
+    .step h3 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.15rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .step p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    @media (min-width: 768px) {
+      .steps {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2.5rem;
+      }
+
+      .step {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+      }
+    }
+
+    /* ---- WHAT IS AN AGENT ---- */
+    .explainer {
+      background: var(--bg-elevated);
+      border-top: 1px solid var(--border);
+      border-bottom: none;
+    }
+
+    .explainer-content {
+      max-width: 640px;
+    }
+
+    .explainer-content p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .explainer-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .explainer-content strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ---- WHAT IT DOES ---- */
+    #what-it-does {
+      border-top: 1px solid var(--border);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 30px var(--accent-glow);
+    }
+
+    .card h3 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.15rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    @media (min-width: 768px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* ---- WHO IT'S FOR ---- */
+    #who-its-for {
+      border-top: 1px solid var(--border);
+    }
+
+    .industries {
+      margin-top: 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .industry {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .industry-marker {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .industry span {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .industry em {
+      color: var(--text-muted);
+      font-style: normal;
+      font-size: 0.9rem;
+    }
+
+    @media (min-width: 768px) {
+      .industries {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+    }
+
+    /* ---- PRICING ---- */
+    #pricing {
+      border-top: 1px solid var(--border);
+    }
+
+    .pricing-box {
+      margin-top: 3rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .pricing-box h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .pricing-box p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+      max-width: 460px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ---- CONTACT ---- */
+    #contact {
+      border-top: 1px solid var(--border);
+    }
+
+    .form-wrapper {
+      margin-top: 3rem;
+      max-width: 520px;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #555;
+    }
+
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%239a9898' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+
+    .form-group select option {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-error {
+      color: #e05252;
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+
+    .form-error.visible {
+      display: block;
+    }
+
+    .form-success {
+      display: none;
+      padding: 1.25rem;
+      background: rgba(212, 149, 42, 0.1);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .form-success.visible {
+      display: block;
+    }
+
+    /* ---- FOOTER ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .footer-brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .footer-brand span {
+      color: var(--accent);
+    }
+
+    .footer-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .footer-details a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-details a:hover {
+      color: var(--text);
+    }
+
+    .footer-copy {
+      color: #555;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .footer-inner {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .footer-copy {
+        margin-top: 0;
+        text-align: right;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-wordmark">Relay<span>AI</span></a>
+    <ul class="nav-links">
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#what-it-does">What It Does</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#contact" class="nav-cta">Get in Touch</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu">
+    <a href="#how-it-works">How It Works</a>
+    <a href="#what-it-does">What It Does</a>
+    <a href="#who-its-for">Who It's For</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Get in Touch</a>
+  </div>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-content">
+        <h1>Your Business, Running While You Sleep.</h1>
+        <p>We build custom agents that plug into your existing tools and do the work you shouldn't have to &mdash; handling enquiries, chasing invoices, updating your CRM, or whatever else is eating your time.</p>
+        <a href="#contact" class="btn">Book a Free Consultation</a>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works">
+      <div class="container">
+        <p class="section-label">How It Works</p>
+        <h2 class="section-heading">Three steps. Then it runs itself.</h2>
+        <p class="section-sub">No complicated setup. No months-long build.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div>
+              <h3>We learn your business</h3>
+              <p>We dig into your workflows, tools, and pain points to understand exactly where an agent would make the biggest difference.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <div>
+              <h3>We build your agent</h3>
+              <p>A custom agent designed around your specific needs &mdash; connected to your existing systems, trained on how your business actually operates.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <div>
+              <h3>It works for you 24/7</h3>
+              <p>Your agent runs in the background, handling tasks around the clock. It escalates when a human touch is needed. You stay in control.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT IS AN AGENT -->
+    <section class="explainer">
+      <div class="container">
+        <div class="explainer-content">
+          <p class="section-label">Wait, what's an agent?</p>
+          <h2 class="section-heading">Think of it as a digital employee.</h2>
+          <p>An agent is a piece of software that can <strong>read, understand, and respond</strong> &mdash; just like a person would. It can hold a conversation with a customer over text, pull up information from your systems, fill in a form, send a follow-up, or flag something for your attention.</p>
+          <p>The difference? <strong>It never clocks off.</strong> It doesn't forget steps. It doesn't need training twice. And it works inside the tools you already use &mdash; your CRM, your email, your spreadsheets &mdash; so nothing changes about how you run your business.</p>
+          <p>You don't need to understand how it works under the hood. You just tell us what you need done, and we build an agent that does it.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT IT DOES -->
+    <section id="what-it-does">
+      <div class="container">
+        <p class="section-label">What It Does</p>
+        <h2 class="section-heading">If it's repetitive, your agent can do it.</h2>
+        <p class="section-sub">Every agent is built to fit your business. Here are some of the things they can do.</p>
+        <div class="cards">
+          <div class="card">
+            <h3>Handle Customer Enquiries</h3>
+            <p>Respond to questions via WhatsApp, SMS, or web chat instantly &mdash; with accurate, context-aware answers about your services, pricing, and availability.</p>
+          </div>
+          <div class="card">
+            <h3>Capture &amp; Qualify Leads</h3>
+            <p>Your agent collects the details you need from new enquiries and saves them straight to your CRM. By the time you call back, you already know the job.</p>
+          </div>
+          <div class="card">
+            <h3>Automate Admin Work</h3>
+            <p>Follow-ups, appointment reminders, data entry, invoice chasing &mdash; the tasks that eat your day but don't need your expertise. Gone.</p>
+          </div>
+          <div class="card">
+            <h3>Connect Your Tools</h3>
+            <p>Your agent plugs into the systems you already use &mdash; CRMs, spreadsheets, booking platforms, email. No ripping and replacing, just smarter workflows.</p>
+          </div>
+          <div class="card">
+            <h3>Escalate When It Matters</h3>
+            <p>Not everything should be automated. Your agent knows when to loop in a human and sends you a summary with all the context you need to take over.</p>
+          </div>
+          <div class="card">
+            <h3>Whatever Else You Need</h3>
+            <p>Every business is different. If there's a task that's costing you time and can be described in a process, there's a good chance we can build an agent for it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHO IT'S FOR -->
+    <section id="who-its-for">
+      <div class="container">
+        <p class="section-label">Who It's For</p>
+        <h2 class="section-heading">Built for businesses that are too busy for busywork.</h2>
+        <p class="section-sub">If repetitive tasks are pulling you away from the work that actually grows your business, we can help.</p>
+        <div class="industries">
+          <div class="industry">
+            <div class="industry-marker"></div>
+            <div><span>Tradies &amp; Home Services</span> &mdash; <em>Plumbers, electricians, builders, cleaners</em></div>
+          </div>
+          <div class="industry">
+            <div class="industry-marker"></div>
+            <div><span>Real Estate</span> &mdash; <em>Agents, property managers, rental enquiries</em></div>
+          </div>
+          <div class="industry">
+            <div class="industry-marker"></div>
+            <div><span>Clinics &amp; Health</span> &mdash; <em>Physio, dental, allied health, vets</em></div>
+          </div>
+          <div class="industry">
+            <div class="industry-marker"></div>
+            <div><span>Professional Services</span> &mdash; <em>Accountants, lawyers, consultants</em></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing">
+      <div class="container">
+        <p class="section-label">Pricing</p>
+        <h2 class="section-heading">No cookie-cutter plans.</h2>
+        <p class="section-sub">Every business is different, so every agent is different. We'll put together a quote based on what you need built.</p>
+        <div class="pricing-box">
+          <h3>Get a Custom Quote</h3>
+          <p>Tell us what's eating your time and we'll scope out an agent that fixes it. Clear, fixed monthly pricing. No lock-in contracts. No surprises.</p>
+          <a href="#contact" class="btn">Book a Free Consultation</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact">
+      <div class="container">
+        <p class="section-label">Get in Touch</p>
+        <h2 class="section-heading">Let's talk about what you need.</h2>
+        <p class="section-sub">Fill in the form below and we'll be in touch within one business day.</p>
+        <div class="form-wrapper">
+          <form id="contact-form" novalidate>
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" placeholder="Your name" required>
+              <p class="form-error" data-field="name">Please enter your name.</p>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" required>
+              <p class="form-error" data-field="email">Please enter a valid email address.</p>
+            </div>
+            <div class="form-group">
+              <label for="business-type">Business Type</label>
+              <select id="business-type" name="business_type" required>
+                <option value="" disabled selected>Select your industry</option>
+                <option value="trades">Trades &amp; Home Services</option>
+                <option value="real-estate">Real Estate</option>
+                <option value="health">Clinics &amp; Health</option>
+                <option value="professional">Professional Services</option>
+                <option value="hospitality">Hospitality &amp; Food</option>
+                <option value="retail">Retail</option>
+                <option value="other">Other</option>
+              </select>
+              <p class="form-error" data-field="business_type">Please select a business type.</p>
+            </div>
+            <div class="form-group">
+              <label for="message">Message <span style="color: var(--text-muted); font-weight: 400;">(optional)</span></label>
+              <textarea id="message" name="message" placeholder="Tell us a bit about your business and what you're looking for..."></textarea>
+            </div>
+            <button type="submit" class="btn">Send Message</button>
+          </form>
+          <div class="form-success" id="form-success">
+            <strong>Thanks for reaching out.</strong> We've received your message and will be in touch within one business day.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-brand">Relay<span>AI</span></div>
+        <div class="footer-details">
+          <span>ABN: 046 873 536 821</span>
+          <a href="mailto:hello@relayai.com.au">hello@relayai.com.au</a>
+          <a href="tel:+61400000000">0403 357 524</a>
+        </div>
+      </div>
+      <p class="footer-copy">&copy; 2026 RelayAI. Adelaide, Australia.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      // ---- NAV SCROLL EFFECT ----
+      var nav = document.querySelector('nav');
+      var lastScroll = 0;
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > 40) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+        lastScroll = window.scrollY;
+      }, { passive: true });
+
+      // ---- MOBILE MENU ----
+      var toggle = document.querySelector('.nav-toggle');
+      var mobileMenu = document.querySelector('.mobile-menu');
+
+      toggle.addEventListener('click', function () {
+        toggle.classList.toggle('active');
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+      });
+
+      mobileMenu.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+          toggle.classList.remove('active');
+          mobileMenu.classList.remove('open');
+          document.body.style.overflow = '';
+        });
+      });
+
+      // ---- FORM VALIDATION ----
+      var form = document.getElementById('contact-form');
+      var successMsg = document.getElementById('form-success');
+
+      function showError(field) {
+        var el = form.querySelector('.form-error[data-field="' + field + '"]');
+        if (el) el.classList.add('visible');
+      }
+
+      function clearErrors() {
+        form.querySelectorAll('.form-error').forEach(function (el) {
+          el.classList.remove('visible');
+        });
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearErrors();
+
+        var name = form.querySelector('#name').value.trim();
+        var email = form.querySelector('#email').value.trim();
+        var businessType = form.querySelector('#business-type').value;
+        var message = form.querySelector('#message').value.trim();
+        var valid = true;
+
+        if (!name) {
+          showError('name');
+          valid = false;
+        }
+
+        if (!email || !isValidEmail(email)) {
+          showError('email');
+          valid = false;
+        }
+
+        if (!businessType) {
+          showError('business_type');
+          valid = false;
+        }
+
+        if (!valid) return;
+
+        var data = {
+          name: name,
+          email: email,
+          business_type: businessType,
+          message: message
+        };
+
+        console.log('Form submission:', data);
+
+        form.style.display = 'none';
+        successMsg.classList.add('visible');
+      });
+
+      // Clear individual errors on input
+      form.querySelectorAll('input, select, textarea').forEach(function (el) {
+        el.addEventListener('input', function () {
+          var name = el.getAttribute('name');
+          var errorEl = form.querySelector('.form-error[data-field="' + name + '"]');
+          if (errorEl) errorEl.classList.remove('visible');
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
