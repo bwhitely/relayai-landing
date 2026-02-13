@@ -37,6 +37,8 @@ async def create_tenant(
         system_prompt=body.system_prompt,
         tools_config=body.tools_config,
         crm_type=body.crm_type,
+        calendar_type=body.calendar_type,
+        accounting_type=body.accounting_type,
         escalation_config=body.escalation_config,
         max_conversations_per_month=body.max_conversations_per_month,
         api_key=secrets.token_urlsafe(32),
@@ -44,6 +46,10 @@ async def create_tenant(
     # Encrypt sensitive fields if provided
     if body.crm_credentials:
         tenant.crm_credentials = encrypt(body.crm_credentials)
+    if body.calendar_credentials:
+        tenant.calendar_credentials = encrypt(body.calendar_credentials)
+    if body.accounting_credentials:
+        tenant.accounting_credentials = encrypt(body.accounting_credentials)
     if body.twilio_account_sid:
         tenant.twilio_account_sid = body.twilio_account_sid
     if body.twilio_auth_token:
@@ -81,6 +87,10 @@ async def update_tenant(
     # Encrypt sensitive fields
     if "crm_credentials" in update_data and update_data["crm_credentials"]:
         update_data["crm_credentials"] = encrypt(update_data["crm_credentials"])
+    if "calendar_credentials" in update_data and update_data["calendar_credentials"]:
+        update_data["calendar_credentials"] = encrypt(update_data["calendar_credentials"])
+    if "accounting_credentials" in update_data and update_data["accounting_credentials"]:
+        update_data["accounting_credentials"] = encrypt(update_data["accounting_credentials"])
     if "twilio_auth_token" in update_data and update_data["twilio_auth_token"]:
         update_data["twilio_auth_token"] = encrypt(update_data["twilio_auth_token"])
 

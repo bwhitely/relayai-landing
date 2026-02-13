@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.models.tenant import CRMType
+from app.models.tenant import AccountingType, CalendarType, CRMType
 
 
 class TenantCreate(BaseModel):
@@ -13,8 +13,12 @@ class TenantCreate(BaseModel):
     tools_config: dict | None = None
     crm_type: CRMType = CRMType.none
     crm_credentials: str | None = None
+    calendar_type: CalendarType = CalendarType.none
+    calendar_credentials: str | None = None
     twilio_account_sid: str | None = None
     twilio_auth_token: str | None = None
+    accounting_type: AccountingType = AccountingType.none
+    accounting_credentials: str | None = None
     escalation_config: dict | None = None
     max_conversations_per_month: int = 100
 
@@ -26,6 +30,10 @@ class TenantUpdate(BaseModel):
     tools_config: dict | None = None
     crm_type: CRMType | None = None
     crm_credentials: str | None = None
+    calendar_type: CalendarType | None = None
+    calendar_credentials: str | None = None
+    accounting_type: AccountingType | None = None
+    accounting_credentials: str | None = None
     twilio_account_sid: str | None = None
     twilio_auth_token: str | None = None
     escalation_config: dict | None = None
@@ -40,6 +48,8 @@ class TenantResponse(BaseModel):
     system_prompt: str | None
     tools_config: dict | None
     crm_type: CRMType
+    calendar_type: CalendarType
+    accounting_type: AccountingType
     escalation_config: dict | None
     max_conversations_per_month: int
     is_active: bool

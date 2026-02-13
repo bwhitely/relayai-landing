@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
@@ -35,5 +36,12 @@ app.include_router(tenants.router)
 app.include_router(webhooks.router)
 
 _static_dir = pathlib.Path(__file__).parent / "static"
+
+
+@app.get("/admin/dashboard")
+async def admin_dashboard():
+    return FileResponse(_static_dir / "admin" / "index.html", media_type="text/html")
+
+
 if _static_dir.is_dir():
     app.mount("/static", StaticFiles(directory=_static_dir), name="static")

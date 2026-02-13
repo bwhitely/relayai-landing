@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     default_model: str = "claude-sonnet-4-5-20250929"
     max_agent_iterations: int = 5
     agent_timeout_seconds: int = 30
+    resend_api_key: str = ""
+    default_from_email: str = "noreply@relayai.com.au"
     log_level: str = "INFO"
 
     model_config = SettingsConfigDict(env_file=".env")

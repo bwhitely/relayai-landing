@@ -9,7 +9,7 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from app.agent.loop import run_agent_loop
 from app.database import get_db
-from app.integrations.twilio import send_whatsapp_message, validate_twilio_signature
+from app.integrations.twilio import send_sms_message, send_whatsapp_message, validate_twilio_signature
 from app.middleware.rate_limit import check_webhook_rate_limit
 from app.models import ChannelType, Conversation, ConversationStatus, Tenant, UsageLog
 from app.schemas.webhook import GenericWebhookRequest, GenericWebhookResponse
@@ -127,6 +127,74 @@ async def twilio_whatsapp_webhook(
 
     # Send reply via Twilio
     await send_whatsapp_message(
+        to=from_number,
+        body=agent_result.response_text,
+        from_number=to_number,
+    )
+
+    return {"status": "ok"}
+
+
+@router.post("/twilio/sms")
+async def twilio_sms_webhook(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    form = await request.form()
+    params = dict(form)
+
+    # Validate Twilio signature
+    signature = request.headers.get("X-Twilio-Signature", "")
+    url = str(request.url)
+    if not validate_twilio_signature(url, params, signature):
+        raise HTTPException(status_code=403, detail="Invalid Twilio signature")
+
+    # Extract message fields (SMS has no 'whatsapp:' prefix)
+    to_number = params.get("To", "")
+    from_number = params.get("From", "")
+    body = params.get("Body", "")
+
+    if not body:
+        return {"status": "ignored", "reason": "empty message"}
+
+    # Look up tenant by phone number
+    result = await db.execute(
+        select(Tenant).where(
+            Tenant.twilio_phone_number == to_number,
+            Tenant.is_active == True,
+        )
+    )
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        logger.warning("No tenant found for number=%s", to_number)
+        raise HTTPException(status_code=404, detail="No tenant for this number")
+
+    # Get or create conversation
+    conversation = await _get_or_create_conversation(
+        db, tenant.id, from_number, ChannelType.sms
+    )
+
+    # Run agent loop
+    agent_result = await run_agent_loop(tenant, conversation.messages, body)
+
+    # Update conversation
+    conversation.messages = agent_result.messages
+    flag_modified(conversation, "messages")
+    conversation.last_message_at = datetime.now(timezone.utc)
+
+    # Log usage
+    await _log_usage(
+        db,
+        tenant.id,
+        conversation.id,
+        agent_result.total_input_tokens,
+        agent_result.total_output_tokens,
+        agent_result.model,
+        agent_result.total_cost_usd,
+    )
+
+    # Send reply via Twilio SMS
+    await send_sms_message(
         to=from_number,
         body=agent_result.response_text,
         from_number=to_number,

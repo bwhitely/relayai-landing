@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Callable, Awaitable
 
-from app.models.tenant import CRMType, Tenant
+from app.models.tenant import AccountingType, CalendarType, CRMType, Tenant
 
 logger = logging.getLogger(__name__)
 
@@ -84,16 +84,74 @@ register_tool(
 async def _escalate_to_human_handler(tool_input: dict, tenant: Tenant) -> dict:
     reason = tool_input.get("reason", "No reason provided")
     summary = tool_input.get("conversation_summary", "")
+    sender_id = tool_input.get("sender_id", "unknown")
     logger.info(
         "Escalation requested for tenant=%s reason=%s",
         tenant.name,
         reason,
     )
-    # TODO: Send notification via Slack/email using tenant.escalation_config
-    return {
+
+    notified_channels: list[str] = []
+    errors: list[str] = []
+
+    config = tenant.escalation_config or {}
+
+    # Send Slack notification if configured
+    slack_url = config.get("slack_webhook_url")
+    if slack_url:
+        try:
+            from app.integrations.slack import send_escalation_notification
+            await send_escalation_notification(
+                webhook_url=slack_url,
+                tenant_name=tenant.name,
+                reason=reason,
+                summary=summary,
+                sender_id=sender_id,
+            )
+            notified_channels.append("slack")
+        except Exception as e:
+            logger.error("Slack escalation failed: %s", e)
+            errors.append(f"slack: {e}")
+
+    # Send email notification if configured
+    email_to = config.get("email")
+    if email_to:
+        try:
+            from app.config import get_settings
+            from app.integrations.email import send_email
+            settings = get_settings()
+            api_key = config.get("resend_api_key") or settings.resend_api_key
+            if api_key:
+                html_body = (
+                    f"<h2>Escalation Required</h2>"
+                    f"<p><strong>Business:</strong> {tenant.name}</p>"
+                    f"<p><strong>Customer:</strong> {sender_id}</p>"
+                    f"<p><strong>Reason:</strong> {reason}</p>"
+                )
+                if summary:
+                    html_body += f"<p><strong>Summary:</strong> {summary}</p>"
+                await send_email(
+                    api_key=api_key,
+                    from_addr=settings.default_from_email,
+                    to=email_to,
+                    subject=f"Escalation: {tenant.name} - {reason[:50]}",
+                    html_body=html_body,
+                )
+                notified_channels.append("email")
+        except Exception as e:
+            logger.error("Email escalation failed: %s", e)
+            errors.append(f"email: {e}")
+
+    result: dict = {
         "status": "escalated",
         "message": "A human team member has been notified and will follow up shortly.",
     }
+    if notified_channels:
+        result["notified_via"] = notified_channels
+    if errors:
+        result["notification_errors"] = errors
+
+    return result
 
 
 register_tool(
@@ -109,6 +167,10 @@ register_tool(
             "conversation_summary": {
                 "type": "string",
                 "description": "Brief summary of the conversation so far",
+            },
+            "sender_id": {
+                "type": "string",
+                "description": "The customer's phone number or identifier",
             },
         },
         "required": ["reason"],
@@ -127,6 +189,22 @@ def _get_crm_credentials(tenant: Tenant) -> str:
     return decrypt(tenant.crm_credentials)
 
 
+def _get_calendar_credentials(tenant: Tenant) -> str:
+    """Decrypt and return calendar credentials for a tenant."""
+    if not tenant.calendar_credentials:
+        raise ValueError("No calendar credentials configured for this tenant")
+    from app.utils.encryption import decrypt
+    return decrypt(tenant.calendar_credentials)
+
+
+def _get_accounting_credentials(tenant: Tenant) -> dict:
+    """Decrypt and return accounting credentials for a tenant."""
+    if not tenant.accounting_credentials:
+        raise ValueError("No accounting credentials configured for this tenant")
+    from app.utils.encryption import decrypt
+    return json.loads(decrypt(tenant.accounting_credentials))
+
+
 async def _create_lead_handler(tool_input: dict, tenant: Tenant) -> dict:
     """Create a lead/contact in the tenant's CRM."""
     if tenant.crm_type == CRMType.hubspot:
@@ -138,8 +216,12 @@ async def _create_lead_handler(tool_input: dict, tenant: Tenant) -> dict:
             "email": tool_input.get("email", ""),
             "phone": tool_input.get("phone", ""),
             "company": tool_input.get("company", ""),
+            "hs_lead_status": tool_input.get("lead_status", "NEW"),
         }
-        # Remove empty values
+        notes = tool_input.get("notes", "")
+        if notes:
+            properties["notes"] = notes
+        # Remove empty values (but keep hs_lead_status)
         properties = {k: v for k, v in properties.items() if v}
         return await create_contact(properties, api_key)
 
@@ -203,6 +285,11 @@ register_tool(
             "notes": {
                 "type": "string",
                 "description": "Any additional notes about the customer or their enquiry",
+            },
+            "lead_status": {
+                "type": "string",
+                "description": "The lead status based on the conversation. Use NEW for first-time enquiries, OPEN for engaged leads actively discussing services, IN_PROGRESS for leads mid-booking or awaiting follow-up, ATTEMPTED_TO_CONTACT if the customer was unresponsive, UNQUALIFIED if the customer is not a fit.",
+                "enum": ["NEW", "OPEN", "IN_PROGRESS", "ATTEMPTED_TO_CONTACT", "UNQUALIFIED"],
             },
         },
         "required": ["first_name"],
@@ -355,30 +442,60 @@ register_tool(
 # --- Availability tools ---
 
 async def _check_availability_handler(tool_input: dict, tenant: Tenant) -> dict:
-    """Check practitioner availability. Currently supports Splose only."""
-    if tenant.crm_type != CRMType.splose:
-        return {"error": "Availability checking is only available for Splose-integrated tenants"}
-
-    from app.integrations.splose import check_availability
-
-    creds = json.loads(_get_crm_credentials(tenant))
-    practitioner_id = tool_input.get("practitioner_id") or creds.get("default_practitioner_id")
-    if not practitioner_id:
-        return {"error": "No practitioner_id provided and no default configured"}
-
+    """Check availability. Supports Google Calendar, Calendly, and Splose."""
     start_date = tool_input.get("start_date", "")
     end_date = tool_input.get("end_date", "")
     if not start_date or not end_date:
         return {"error": "Both start_date and end_date are required"}
 
-    slots = await check_availability(
-        practitioner_id=int(practitioner_id),
-        start_date=start_date,
-        end_date=end_date,
-        api_key=creds["api_key"],
-        location_id=creds.get("default_location_id"),
-    )
-    return {"slots": slots, "count": len(slots)}
+    # Check calendar_type first
+    if tenant.calendar_type == CalendarType.google_calendar:
+        from app.integrations.google_calendar import check_availability as gcal_check
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        calendar_id = creds.get("calendar_id", "primary")
+        busy = await gcal_check(
+            calendar_id=calendar_id,
+            start=start_date,
+            end=end_date,
+            creds_dict=creds,
+        )
+        return {"busy_periods": busy, "count": len(busy)}
+
+    if tenant.calendar_type == CalendarType.calendly:
+        from app.integrations.calendly import get_available_times
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        event_type_uri = creds.get("event_type_uri", "")
+        if not event_type_uri:
+            return {"error": "No event_type_uri in Calendly credentials"}
+        slots = await get_available_times(
+            event_type_uri=event_type_uri,
+            start_time=start_date,
+            end_time=end_date,
+            api_key=creds["api_key"],
+        )
+        return {"slots": slots, "count": len(slots)}
+
+    # Fall back to CRM-based availability (Splose)
+    if tenant.crm_type == CRMType.splose:
+        from app.integrations.splose import check_availability
+
+        creds = json.loads(_get_crm_credentials(tenant))
+        practitioner_id = tool_input.get("practitioner_id") or creds.get("default_practitioner_id")
+        if not practitioner_id:
+            return {"error": "No practitioner_id provided and no default configured"}
+
+        slots = await check_availability(
+            practitioner_id=int(practitioner_id),
+            start_date=start_date,
+            end_date=end_date,
+            api_key=creds["api_key"],
+            location_id=creds.get("default_location_id"),
+        )
+        return {"slots": slots, "count": len(slots)}
+
+    return {"error": "No calendar or scheduling integration configured for this tenant"}
 
 
 register_tool(
@@ -403,4 +520,269 @@ register_tool(
         "required": ["start_date", "end_date"],
     },
     handler=_check_availability_handler,
+)
+
+
+# --- Booking tools ---
+
+async def _book_appointment_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """Book an appointment. Supports Google Calendar, Calendly, and Splose."""
+    start = tool_input.get("start", "")
+    end = tool_input.get("end", "")
+    if not start or not end:
+        return {"error": "Both start and end times are required"}
+
+    summary = tool_input.get("summary", "Appointment")
+
+    # Check calendar_type first
+    if tenant.calendar_type == CalendarType.google_calendar:
+        from app.integrations.google_calendar import create_event
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        calendar_id = creds.get("calendar_id", "primary")
+        result = await create_event(
+            calendar_id=calendar_id,
+            summary=summary,
+            start=start,
+            end=end,
+            creds_dict=creds,
+            description=tool_input.get("description"),
+        )
+        return result
+
+    if tenant.calendar_type == CalendarType.calendly:
+        from app.integrations.calendly import get_scheduling_link
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        event_type_uri = creds.get("event_type_uri", "")
+        if not event_type_uri:
+            return {"error": "No event_type_uri in Calendly credentials"}
+        link_info = await get_scheduling_link(
+            event_type_uri=event_type_uri,
+            api_key=creds["api_key"],
+        )
+        return {
+            "status": "scheduling_link",
+            "message": "Calendly does not support direct booking via API. Please share this link with the customer.",
+            "scheduling_url": link_info["scheduling_url"],
+            "event_name": link_info["name"],
+            "duration_minutes": link_info["duration_minutes"],
+        }
+
+    # Fall back to CRM-based booking (Splose)
+    if tenant.crm_type == CRMType.splose:
+        from app.integrations.splose import create_appointment
+
+        creds = json.loads(_get_crm_credentials(tenant))
+        patient_id = tool_input.get("patient_id")
+        if not patient_id:
+            return {"error": "patient_id is required for Splose bookings"}
+
+        practitioner_id = tool_input.get("practitioner_id") or creds.get("default_practitioner_id")
+        service_id = tool_input.get("service_id") or creds.get("default_service_id")
+        location_id = tool_input.get("location_id") or creds.get("default_location_id")
+
+        if not all([practitioner_id, service_id, location_id]):
+            return {"error": "practitioner_id, service_id, and location_id are required (or must be configured as defaults)"}
+
+        result = await create_appointment(
+            start=start,
+            end=end,
+            patient_id=int(patient_id),
+            practitioner_id=int(practitioner_id),
+            service_id=int(service_id),
+            location_id=int(location_id),
+            api_key=creds["api_key"],
+            note=tool_input.get("description"),
+        )
+        return result
+
+    return {"error": "No calendar or booking integration configured for this tenant"}
+
+
+register_tool(
+    name="book_appointment",
+    description="Book an appointment on the calendar. Use this after checking availability and confirming a time with the customer.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "summary": {
+                "type": "string",
+                "description": "Title for the appointment (e.g. customer name + service type)",
+            },
+            "start": {
+                "type": "string",
+                "description": "Appointment start time in ISO format (e.g. 2024-01-15T09:00:00+10:30)",
+            },
+            "end": {
+                "type": "string",
+                "description": "Appointment end time in ISO format (e.g. 2024-01-15T10:00:00+10:30)",
+            },
+            "description": {
+                "type": "string",
+                "description": "Optional notes or description for the appointment",
+            },
+            "patient_id": {
+                "type": "integer",
+                "description": "Patient/contact ID (required for Splose bookings, from search_contacts results)",
+            },
+            "practitioner_id": {
+                "type": "integer",
+                "description": "Practitioner ID (uses default if not provided)",
+            },
+            "service_id": {
+                "type": "integer",
+                "description": "Service ID (uses default if not provided)",
+            },
+            "location_id": {
+                "type": "integer",
+                "description": "Location ID (uses default if not provided)",
+            },
+        },
+        "required": ["summary", "start", "end"],
+    },
+    handler=_book_appointment_handler,
+)
+
+
+# --- Email tool ---
+
+async def _send_email_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """Send an email to a customer."""
+    to_email = tool_input.get("to_email", "")
+    subject = tool_input.get("subject", "")
+    body = tool_input.get("body", "")
+
+    if not to_email or not subject or not body:
+        return {"error": "to_email, subject, and body are all required"}
+
+    from app.config import get_settings
+    from app.integrations.email import send_email
+
+    settings = get_settings()
+    # Per-tenant override via escalation_config, or shared key
+    config = tenant.escalation_config or {}
+    api_key = config.get("resend_api_key") or settings.resend_api_key
+    if not api_key:
+        return {"error": "No Resend API key configured"}
+
+    from_addr = config.get("from_email") or settings.default_from_email
+    return await send_email(
+        api_key=api_key,
+        from_addr=from_addr,
+        to=to_email,
+        subject=subject,
+        html_body=body,
+    )
+
+
+register_tool(
+    name="send_email",
+    description="Send an email to a customer. Use this for appointment confirmations, follow-ups, or other email communications.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "to_email": {
+                "type": "string",
+                "description": "Recipient's email address",
+            },
+            "subject": {
+                "type": "string",
+                "description": "Email subject line",
+            },
+            "body": {
+                "type": "string",
+                "description": "Email body content (HTML supported)",
+            },
+        },
+        "required": ["to_email", "subject", "body"],
+    },
+    handler=_send_email_handler,
+)
+
+
+# --- Accounting tools ---
+
+async def _search_invoices_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """Search invoices in the tenant's accounting system."""
+    if tenant.accounting_type != AccountingType.xero:
+        return {"error": f"Accounting type '{tenant.accounting_type}' is not configured for invoice search"}
+
+    from app.integrations.xero import search_invoices
+
+    creds = _get_accounting_credentials(tenant)
+    invoices, updated_creds = await search_invoices(
+        creds=creds,
+        contact_name=tool_input.get("contact_name"),
+        status=tool_input.get("status"),
+        invoice_number=tool_input.get("invoice_number"),
+    )
+
+    if updated_creds:
+        from app.utils.encryption import encrypt
+        tenant.accounting_credentials = encrypt(json.dumps(updated_creds))
+
+    return {"invoices": invoices, "count": len(invoices)}
+
+
+register_tool(
+    name="search_invoices",
+    description="Search for invoices in the accounting system. Use this when a customer asks about their invoices, billing, or payment history.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "contact_name": {
+                "type": "string",
+                "description": "Customer or contact name to filter invoices by",
+            },
+            "status": {
+                "type": "string",
+                "description": "Invoice status filter",
+                "enum": ["DRAFT", "SUBMITTED", "AUTHORISED", "PAID", "VOIDED"],
+            },
+            "invoice_number": {
+                "type": "string",
+                "description": "Specific invoice number to search for",
+            },
+        },
+    },
+    handler=_search_invoices_handler,
+)
+
+
+async def _check_payment_status_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """Check payment status for a specific invoice."""
+    invoice_id = tool_input.get("invoice_id", "")
+    if not invoice_id:
+        return {"error": "invoice_id is required"}
+
+    if tenant.accounting_type != AccountingType.xero:
+        return {"error": f"Accounting type '{tenant.accounting_type}' is not configured for payment status checks"}
+
+    from app.integrations.xero import get_invoice
+
+    creds = _get_accounting_credentials(tenant)
+    invoice, updated_creds = await get_invoice(creds=creds, invoice_id=invoice_id)
+
+    if updated_creds:
+        from app.utils.encryption import encrypt
+        tenant.accounting_credentials = encrypt(json.dumps(updated_creds))
+
+    return invoice
+
+
+register_tool(
+    name="check_payment_status",
+    description="Check the payment status and details of a specific invoice. Use this when a customer asks about a particular invoice's payment status.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "invoice_id": {
+                "type": "string",
+                "description": "The invoice ID (from search_invoices results)",
+            },
+        },
+        "required": ["invoice_id"],
+    },
+    handler=_check_payment_status_handler,
 )

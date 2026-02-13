@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.config import Settings, override_settings
-from app.models.tenant import CRMType, Tenant
+from app.models.tenant import CalendarType, CRMType, Tenant
 
 
 @pytest.fixture(autouse=True)
@@ -17,6 +17,8 @@ def mock_settings():
         twilio_account_sid="ACtest",
         twilio_auth_token="test-auth-token",
         fernet_key="dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleTA9PQ==",
+        resend_api_key="test-resend-key",
+        default_from_email="test@relayai.com.au",
         default_model="claude-sonnet-4-5-20250514",
         max_agent_iterations=5,
         agent_timeout_seconds=30,

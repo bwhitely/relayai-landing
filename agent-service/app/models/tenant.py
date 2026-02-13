@@ -18,6 +18,17 @@ class CRMType(str, enum.Enum):
     none = "none"
 
 
+class CalendarType(str, enum.Enum):
+    google_calendar = "google_calendar"
+    calendly = "calendly"
+    none = "none"
+
+
+class AccountingType(str, enum.Enum):
+    xero = "xero"
+    none = "none"
+
+
 class Tenant(Base):
     __tablename__ = "tenants"
 
@@ -34,8 +45,16 @@ class Tenant(Base):
         Enum(CRMType), default=CRMType.none, nullable=False
     )
     crm_credentials: Mapped[str | None] = mapped_column(Text, nullable=True)
+    calendar_type: Mapped[CalendarType] = mapped_column(
+        Enum(CalendarType), default=CalendarType.none, nullable=False
+    )
+    calendar_credentials: Mapped[str | None] = mapped_column(Text, nullable=True)
     twilio_account_sid: Mapped[str | None] = mapped_column(String(64), nullable=True)
     twilio_auth_token: Mapped[str | None] = mapped_column(Text, nullable=True)
+    accounting_type: Mapped[AccountingType] = mapped_column(
+        Enum(AccountingType), default=AccountingType.none, nullable=False
+    )
+    accounting_credentials: Mapped[str | None] = mapped_column(Text, nullable=True)
     escalation_config: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     max_conversations_per_month: Mapped[int] = mapped_column(
         Integer, default=100, nullable=False
