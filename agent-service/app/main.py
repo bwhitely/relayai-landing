@@ -1,7 +1,9 @@
+import pathlib
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.database import close_db, init_db
@@ -31,3 +33,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(tenants.router)
 app.include_router(webhooks.router)
+
+_static_dir = pathlib.Path(__file__).parent / "static"
+if _static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")

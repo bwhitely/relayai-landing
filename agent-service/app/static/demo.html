@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 0 20px;
+            color: #333;
+            background: #fff;
+        }
+        h1 { color: #1a1a1a; }
+        p { line-height: 1.6; color: #555; }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .note {
+            background: #fffbeb;
+            border-left: 4px solid #D97706;
+            padding: 16px;
+            margin: 24px 0;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Widget Demo</h1>
+    <p>This page demonstrates the embeddable chat widget. Look for the chat bubble in the bottom-right corner.</p>
+
+    <div class="note">
+        <strong>Try these messages to test tool use:</strong>
+        <ul>
+            <li>"Can you echo hello for me?" — triggers the echo tool</li>
+            <li>"I'd like to speak to someone about a billing issue" — triggers escalation</li>
+            <li>"My name is Sarah Jones, phone 0412345678, email sarah@test.com" — triggers create_lead</li>
+        </ul>
+    </div>
+
+    <p>The widget is configured to connect to the local agent service. Make sure <code>uvicorn</code> is running on port 8000.</p>
+
+    <script
+        src="/static/widget.js"
+        data-tenant-id="6dbf43f8-079e-47b9-a105-22b6a9758918"
+        data-api-key="zp9-gbXNWbusdLlKmI1bhjz49K13XQ1VOBFpusRey74"
+        data-api-url="http://localhost:8000"
+        data-title="Test Physio Clinic">
+    </script>
+</body>
+</html>
