@@ -54,7 +54,8 @@ ai-agent-business/
 │   │   │   ├── anthropic.py # Claude API client wrapper
 │   │   │   ├── twilio.py    # Twilio WhatsApp send/receive
 │   │   │   ├── hubspot.py   # HubSpot CRM client
-│   │   │   └── google_sheets.py  # Google Sheets fallback CRM
+│   │   │   ├── google_sheets.py  # Google Sheets fallback CRM
+│   │   │   └── splose.py   # Splose allied health practice management client
 │   │   ├── middleware/
 │   │   │   ├── __init__.py
 │   │   │   └── auth.py      # API key auth for admin endpoints
@@ -68,7 +69,8 @@ ai-agent-business/
 │       ├── test_tools.py
 │       └── test_integrations/
 │           ├── test_twilio.py
-│           └── test_hubspot.py
+│           ├── test_hubspot.py
+│           └── test_splose.py
 ```
 
 ---
@@ -144,7 +146,7 @@ A tenant record contains:
 - `twilio_phone_number` (their WhatsApp number — used to route inbound messages)
 - `system_prompt` (the LLM system prompt for this tenant's agent)
 - `tools_config` (JSON — which tools are enabled and their configuration)
-- `crm_type` (enum: hubspot, google_sheets, none)
+- `crm_type` (enum: hubspot, google_sheets, splose, none)
 - `crm_credentials` (encrypted JSON — API keys, sheet IDs, etc.)
 - `twilio_account_sid` / `twilio_auth_token` (encrypted)
 - `escalation_config` (JSON — where to send escalations: Slack webhook, email, etc.)
@@ -188,10 +190,10 @@ The tool registry maps tool names to:
 2. An async execution function
 
 Available tools (implement incrementally):
-- `create_lead` — Creates a contact/lead in the tenant's CRM
+- `create_lead` — Creates a contact/lead in the tenant's CRM (HubSpot, Google Sheets, or Splose patient)
 - `update_lead` — Updates an existing lead with new info
 - `search_contacts` — Checks if this phone number already exists in the CRM
-- `check_availability` — Queries available booking slots (if tenant has a booking system)
+- `check_availability` — Queries available booking slots (Splose practitioner availability, or other booking systems)
 - `escalate_to_human` — Sends a notification to the tenant (Slack, email, SMS) with conversation summary
 - `search_knowledge_base` — RAG search against tenant's embedded documents (future, not MVP)
 
@@ -383,16 +385,17 @@ Build in this order. Each step produces something testable.
 ### Phase 4: CRM Integration
 14. HubSpot client (create_contact, search_contacts)
 15. Google Sheets client (append_row) as fallback CRM
-16. Wire up `create_lead` and `search_contacts` tools
-17. End-to-end test: WhatsApp conversation → lead appears in HubSpot
+16. Splose client (create_patient, search_patients, check_availability) — allied health practice management
+17. Wire up `create_lead`, `search_contacts`, and `check_availability` tools with CRM dispatch
+18. End-to-end test: WhatsApp conversation → lead appears in HubSpot / Splose
 
 ### Phase 5: Production Readiness
-18. Usage tracking (log tokens per API call, aggregate per tenant)
-19. Credential encryption for tenant secrets
-20. Structured logging
-21. Error handling and graceful degradation
-22. Rate limiting on webhook endpoints
-23. Deploy to VPS with Caddy + Docker Compose
+19. Usage tracking (log tokens per API call, aggregate per tenant)
+20. Credential encryption for tenant secrets
+21. Structured logging
+22. Error handling and graceful degradation
+23. Rate limiting on webhook endpoints
+24. Deploy to VPS with Caddy + Docker Compose
 
 ### Phase 6: Landing Page
 24. Build the landing page (single HTML file)
@@ -408,3 +411,46 @@ Build in this order. Each step produces something testable.
 - **JSONB for conversation history.** Store the raw Anthropic message format. Avoids lossy transformations and means history can be replayed directly. PostgreSQL JSONB is fast enough for this access pattern.
 - **Single service, not microservices.** At 10-30 tenants, there is no reason to split this into multiple services. One FastAPI app handles everything. Split later if a specific component needs independent scaling (unlikely at this stage).
 - **No Redis initially.** Conversation history comes from Postgres. Rate limiting can be in-memory. Add Redis later if you need pub/sub for real-time features or if rate limiting needs to be distributed.
+- **Splose for allied health.** Allied health (physios, psychologists, OTs, speech therapists) is a massive vertical in Australia, and Splose is the dominant practice management tool. Integrating with Splose unlocks a high-value tenant segment — agents that can create patients, check practitioner availability, and book appointments directly.
+
+---
+
+## Splose Integration Details
+
+Splose is a practice management platform for allied health and NDIS providers. API docs: https://docs.splose.com/introduction
+
+### API Basics
+- **Base URL**: `https://api.splose.com/v1`
+- **Auth**: Bearer token (`Authorization: Bearer <api_key>`). API keys are created by workspace owners in the Splose dashboard.
+- **Required header**: `User-Agent` must be present on all requests or they are rejected.
+- **Rate limit**: 60 calls/min per API key.
+- **Pagination**: Cursor-based using `id_gt` / `id_lt` query params. Responses include a `links` object with `previousPage` / `nextPage`.
+
+### Endpoints We Use
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/patients` | GET | Search patients by name, email, phone |
+| `/patients` | POST | Create patient (required: `firstname`, `lastname`) |
+| `/patients/{id}` | GET | Get single patient details |
+| `/practitioners` | GET | List practitioners (filter by active, role) |
+| `/availabilities/{practitionerId}` | GET | Get practitioner availability (max 100 days, requires `startDate`/`endDate`) |
+| `/appointments` | POST | Book appointment (requires `start`, `end`, `serviceId`, `locationId`, `practitionerId`, `patientId`) |
+
+### Key Quirks
+- Patient field names are **lowercase** (`firstname`, `lastname`) while Contact field names are **camelCase** (`firstName`, `lastName`).
+- Availability returns time-of-day as `HH:mm` strings, not ISO datetimes. Combined with a separate `date` field.
+- Appointment creation requires `serviceId`, `locationId`, and `practitionerId` — these need to be known in advance (fetched from list endpoints or stored in tenant config).
+- PUT `/patients/{id}` returns the number `1`, not the patient object.
+
+### Tenant Configuration for Splose
+When `crm_type = "splose"`, `crm_credentials` (encrypted JSON) should contain:
+```json
+{
+  "api_key": "splose-api-key-here",
+  "default_practitioner_id": 1,
+  "default_service_id": 1,
+  "default_location_id": 1
+}
+```
+The `default_*` fields allow the agent to book appointments without needing to ask the customer which practitioner/service/location — sensible defaults for single-practitioner or single-location practices.
