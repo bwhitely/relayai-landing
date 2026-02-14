@@ -408,3 +408,128 @@ async def test_update_lead_splose_dispatch(splose_tenant):
     mock_update.assert_called_once()
     # Verify patient_id was converted to int
     assert mock_update.call_args.args[0] == 42
+
+
+# --- Splose list/cancel appointment unit tests ---
+
+@pytest.mark.asyncio
+async def test_splose_list_appointments():
+    from app.integrations.splose import list_appointments
+
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        "data": [
+            {
+                "id": 101,
+                "start": "2024-01-15T09:00:00.000Z",
+                "end": "2024-01-15T10:00:00.000Z",
+                "practitionerId": 1,
+                "patientId": 42,
+                "serviceId": 5,
+                "locationId": 2,
+                "note": "Initial consult",
+                "appointmentPatients": [{"status": "Confirmed"}],
+            },
+            {
+                "id": 102,
+                "start": "2024-01-16T14:00:00.000Z",
+                "end": "2024-01-16T15:00:00.000Z",
+                "practitionerId": 1,
+                "patientId": 43,
+                "serviceId": 5,
+                "locationId": 2,
+                "note": "",
+                "appointmentPatients": [],
+            },
+        ]
+    }
+    mock_response.raise_for_status = MagicMock()
+
+    mock_client = AsyncMock()
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    mock_client.get = AsyncMock(return_value=mock_response)
+
+    with patch("app.integrations.splose.httpx.AsyncClient", return_value=mock_client):
+        results = await list_appointments(
+            api_key="fake-key",
+            practitioner_id=1,
+            start_date="2024-01-15T00:00:00.000Z",
+            end_date="2024-01-22T00:00:00.000Z",
+        )
+
+    assert len(results) == 2
+    assert results[0]["appointment_id"] == 101
+    assert results[0]["status"] == "Confirmed"
+    assert results[1]["status"] == ""  # No appointmentPatients
+
+
+@pytest.mark.asyncio
+async def test_splose_get_appointment():
+    from app.integrations.splose import get_appointment
+
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        "id": 101,
+        "start": "2024-01-15T09:00:00.000Z",
+        "end": "2024-01-15T10:00:00.000Z",
+        "practitionerId": 1,
+        "patientId": 42,
+        "serviceId": 5,
+        "locationId": 2,
+    }
+    mock_response.raise_for_status = MagicMock()
+
+    mock_client = AsyncMock()
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    mock_client.get = AsyncMock(return_value=mock_response)
+
+    with patch("app.integrations.splose.httpx.AsyncClient", return_value=mock_client):
+        result = await get_appointment(101, "fake-key")
+
+    assert result["id"] == 101
+    mock_client.get.assert_called_once()
+    assert "/appointments/101" in str(mock_client.get.call_args)
+
+
+@pytest.mark.asyncio
+async def test_splose_cancel_appointment():
+    from app.integrations.splose import cancel_appointment
+
+    current_appointment = {
+        "id": 101,
+        "start": "2024-01-15T09:00:00.000Z",
+        "end": "2024-01-15T10:00:00.000Z",
+        "practitionerId": 1,
+        "patientId": 42,
+        "serviceId": 5,
+        "locationId": 2,
+        "note": "Initial consult",
+        "appointmentPatients": [{"status": "Confirmed", "patientId": 42}],
+    }
+
+    get_response = MagicMock()
+    get_response.json.return_value = current_appointment
+    get_response.raise_for_status = MagicMock()
+
+    put_response = MagicMock()
+    put_response.raise_for_status = MagicMock()
+
+    mock_client = AsyncMock()
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    mock_client.get = AsyncMock(return_value=get_response)
+    mock_client.put = AsyncMock(return_value=put_response)
+
+    with patch("app.integrations.splose.httpx.AsyncClient", return_value=mock_client):
+        result = await cancel_appointment(101, "fake-key", reason="Patient requested")
+
+    assert result["status"] == "cancelled"
+    assert result["appointment_id"] == 101
+
+    # Verify PUT body has cancellation status
+    put_json = mock_client.put.call_args.kwargs["json"]
+    assert put_json["appointmentPatients"][0]["status"] == "Cancelled"
+    assert put_json["appointmentPatients"][0]["cancellationReason"] == "Patient requested"
+    assert put_json["note"] == "Initial consult"  # Preserved original note

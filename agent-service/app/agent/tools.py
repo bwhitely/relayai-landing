@@ -645,6 +645,160 @@ register_tool(
 )
 
 
+# --- Appointment listing tool ---
+
+async def _list_appointments_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """List upcoming appointments. Supports Google Calendar, Calendly, and Splose."""
+    start_date = tool_input.get("start_date", "")
+    end_date = tool_input.get("end_date", "")
+    if not start_date or not end_date:
+        return {"error": "Both start_date and end_date are required"}
+
+    # Check calendar_type first
+    if tenant.calendar_type == CalendarType.google_calendar:
+        from app.integrations.google_calendar import list_events
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        calendar_id = creds.get("calendar_id", "primary")
+        events = await list_events(
+            calendar_id=calendar_id,
+            time_min=start_date,
+            time_max=end_date,
+            creds_dict=creds,
+        )
+        return {"appointments": events, "count": len(events)}
+
+    if tenant.calendar_type == CalendarType.calendly:
+        from app.integrations.calendly import list_scheduled_events
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        events = await list_scheduled_events(
+            api_key=creds["api_key"],
+            min_start_time=start_date,
+            max_start_time=end_date,
+            invitee_email=tool_input.get("email"),
+        )
+        return {"appointments": events, "count": len(events)}
+
+    # Fall back to CRM-based (Splose)
+    if tenant.crm_type == CRMType.splose:
+        from app.integrations.splose import list_appointments
+
+        creds = json.loads(_get_crm_credentials(tenant))
+        patient_id = tool_input.get("patient_id")
+        practitioner_id = tool_input.get("practitioner_id") or creds.get("default_practitioner_id")
+        appts = await list_appointments(
+            api_key=creds["api_key"],
+            patient_id=int(patient_id) if patient_id else None,
+            practitioner_id=int(practitioner_id) if practitioner_id else None,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        return {"appointments": appts, "count": len(appts)}
+
+    return {"error": "No calendar or scheduling integration configured for this tenant"}
+
+
+register_tool(
+    name="list_appointments",
+    description="List upcoming appointments in a date range. Use this when a customer asks 'when is my next appointment?' or wants to see their bookings.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "start_date": {
+                "type": "string",
+                "description": "Start of date range in ISO format (e.g. 2024-01-15T00:00:00.000Z)",
+            },
+            "end_date": {
+                "type": "string",
+                "description": "End of date range in ISO format (e.g. 2024-01-22T00:00:00.000Z)",
+            },
+            "patient_id": {
+                "type": "integer",
+                "description": "Patient/contact ID to filter by (for Splose)",
+            },
+            "email": {
+                "type": "string",
+                "description": "Invitee email to filter by (for Calendly)",
+            },
+            "practitioner_id": {
+                "type": "integer",
+                "description": "Practitioner ID to filter by (uses default if not provided)",
+            },
+        },
+        "required": ["start_date", "end_date"],
+    },
+    handler=_list_appointments_handler,
+)
+
+
+# --- Appointment cancellation tool ---
+
+async def _cancel_appointment_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """Cancel an appointment. Supports Google Calendar, Calendly, and Splose."""
+    appointment_id = tool_input.get("appointment_id", "")
+    if not appointment_id:
+        return {"error": "appointment_id is required"}
+
+    reason = tool_input.get("reason", "Cancelled by customer")
+
+    # Check calendar_type first
+    if tenant.calendar_type == CalendarType.google_calendar:
+        from app.integrations.google_calendar import delete_event
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        calendar_id = creds.get("calendar_id", "primary")
+        return await delete_event(
+            calendar_id=calendar_id,
+            event_id=appointment_id,
+            creds_dict=creds,
+        )
+
+    if tenant.calendar_type == CalendarType.calendly:
+        from app.integrations.calendly import cancel_event
+
+        creds = json.loads(_get_calendar_credentials(tenant))
+        return await cancel_event(
+            event_uri=appointment_id,
+            reason=reason,
+            api_key=creds["api_key"],
+        )
+
+    # Fall back to CRM-based (Splose)
+    if tenant.crm_type == CRMType.splose:
+        from app.integrations.splose import cancel_appointment
+
+        creds = json.loads(_get_crm_credentials(tenant))
+        return await cancel_appointment(
+            appointment_id=int(appointment_id),
+            api_key=creds["api_key"],
+            reason=reason,
+        )
+
+    return {"error": "No calendar or booking integration configured for this tenant"}
+
+
+register_tool(
+    name="cancel_appointment",
+    description="Cancel an existing appointment. Use this when a customer wants to cancel a booking. Requires the appointment_id from list_appointments results.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "appointment_id": {
+                "type": "string",
+                "description": "The appointment/event ID to cancel (from list_appointments results)",
+            },
+            "reason": {
+                "type": "string",
+                "description": "Reason for cancellation",
+            },
+        },
+        "required": ["appointment_id"],
+    },
+    handler=_cancel_appointment_handler,
+)
+
+
 # --- Email tool ---
 
 async def _send_email_handler(tool_input: dict, tenant: Tenant) -> dict:

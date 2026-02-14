@@ -186,6 +186,55 @@ class TestCalendlyToolDispatch:
         assert result["scheduling_url"] == "https://calendly.com/testuser/30min"
 
     @pytest.mark.asyncio
+    async def test_list_appointments_calendly(self, calendly_tenant):
+        """list_appointments dispatches to Calendly list_scheduled_events."""
+        mock_list = AsyncMock(return_value=[
+            {
+                "event_uri": "https://api.calendly.com/scheduled_events/evt1",
+                "name": "30 Minute Meeting",
+                "start_time": "2024-01-15T09:00:00Z",
+                "end_time": "2024-01-15T09:30:00Z",
+                "status": "active",
+            },
+        ])
+
+        with patch("app.agent.tools._get_calendar_credentials", return_value=CALENDLY_CREDS), \
+             patch("app.integrations.calendly.list_scheduled_events", mock_list):
+            result_str = await execute_tool(
+                "list_appointments",
+                {"start_date": "2024-01-15T00:00:00Z", "end_date": "2024-01-22T00:00:00Z"},
+                calendly_tenant,
+            )
+
+        result = json.loads(result_str)
+        assert result["count"] == 1
+        assert result["appointments"][0]["name"] == "30 Minute Meeting"
+        mock_list.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_cancel_appointment_calendly(self, calendly_tenant):
+        """cancel_appointment dispatches to Calendly cancel_event."""
+        mock_cancel = AsyncMock(return_value={
+            "status": "cancelled",
+            "event_uri": "https://api.calendly.com/scheduled_events/evt1",
+        })
+
+        with patch("app.agent.tools._get_calendar_credentials", return_value=CALENDLY_CREDS), \
+             patch("app.integrations.calendly.cancel_event", mock_cancel):
+            result_str = await execute_tool(
+                "cancel_appointment",
+                {
+                    "appointment_id": "https://api.calendly.com/scheduled_events/evt1",
+                    "reason": "Customer requested cancellation",
+                },
+                calendly_tenant,
+            )
+
+        result = json.loads(result_str)
+        assert result["status"] == "cancelled"
+        mock_cancel.assert_called_once()
+
+    @pytest.mark.asyncio
     async def test_check_availability_no_event_type_uri(self):
         no_uri_creds = json.dumps({"api_key": "test-key"})
         tenant = Tenant(

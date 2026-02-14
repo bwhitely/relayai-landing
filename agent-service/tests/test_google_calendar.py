@@ -341,3 +341,170 @@ async def test_check_availability_no_integration(test_tenant):
         test_tenant,
     ))
     assert "error" in result
+
+
+# --- Google Calendar delete_event tests ---
+
+@pytest.mark.asyncio
+async def test_google_calendar_delete_event():
+    from app.integrations.google_calendar import delete_event
+
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock()
+
+    mock_client = AsyncMock()
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    mock_client.delete = AsyncMock(return_value=mock_response)
+
+    with (
+        patch("app.integrations.google_calendar.httpx.AsyncClient", return_value=mock_client),
+        patch("app.integrations.google_calendar.get_access_token", return_value="fake-token"),
+    ):
+        result = await delete_event(
+            calendar_id="someone@gmail.com",
+            event_id="event123",
+            creds_dict=json.loads(GCAL_CREDS),
+        )
+
+    assert result["status"] == "cancelled"
+    assert result["event_id"] == "event123"
+    mock_client.delete.assert_called_once()
+
+
+# --- list_appointments tool dispatch tests ---
+
+@pytest.mark.asyncio
+async def test_list_appointments_google_calendar_dispatch(gcal_tenant):
+    """list_appointments dispatches to Google Calendar list_events."""
+    mock_list = AsyncMock(return_value=[
+        {"id": "event1", "summary": "Appointment - Jane", "start": "2024-01-15T09:00:00+10:30", "end": "2024-01-15T10:00:00+10:30"},
+    ])
+
+    with (
+        patch("app.agent.tools._get_calendar_credentials", return_value=GCAL_CREDS),
+        patch("app.integrations.google_calendar.list_events", mock_list),
+    ):
+        result = json.loads(await execute_tool(
+            "list_appointments",
+            {"start_date": "2024-01-15T00:00:00+10:30", "end_date": "2024-01-22T00:00:00+10:30"},
+            gcal_tenant,
+        ))
+
+    assert result["count"] == 1
+    assert result["appointments"][0]["summary"] == "Appointment - Jane"
+    mock_list.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_list_appointments_splose_dispatch(splose_tenant):
+    """list_appointments dispatches to Splose list_appointments."""
+    mock_list = AsyncMock(return_value=[
+        {"appointment_id": 55, "start": "2024-01-15T09:00:00.000Z", "end": "2024-01-15T10:00:00.000Z", "practitioner_id": 1, "patient_id": 42, "status": "Confirmed"},
+    ])
+
+    with (
+        patch("app.agent.tools._get_crm_credentials", return_value=SPLOSE_CREDS),
+        patch("app.integrations.splose.list_appointments", mock_list),
+    ):
+        result = json.loads(await execute_tool(
+            "list_appointments",
+            {"start_date": "2024-01-15T00:00:00.000Z", "end_date": "2024-01-22T00:00:00.000Z", "patient_id": 42},
+            splose_tenant,
+        ))
+
+    assert result["count"] == 1
+    assert result["appointments"][0]["appointment_id"] == 55
+    mock_list.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_list_appointments_no_integration(test_tenant):
+    """list_appointments returns error when no calendar/CRM configured."""
+    result = json.loads(await execute_tool(
+        "list_appointments",
+        {"start_date": "2024-01-15T00:00:00.000Z", "end_date": "2024-01-22T00:00:00.000Z"},
+        test_tenant,
+    ))
+    assert "error" in result
+
+
+@pytest.mark.asyncio
+async def test_list_appointments_missing_dates(gcal_tenant):
+    """list_appointments requires both start_date and end_date."""
+    result = json.loads(await execute_tool(
+        "list_appointments",
+        {"start_date": "2024-01-15T00:00:00.000Z"},
+        gcal_tenant,
+    ))
+    assert "error" in result
+
+
+# --- cancel_appointment tool dispatch tests ---
+
+@pytest.mark.asyncio
+async def test_cancel_appointment_google_calendar(gcal_tenant):
+    """cancel_appointment dispatches to Google Calendar delete_event."""
+    mock_delete = AsyncMock(return_value={
+        "status": "cancelled",
+        "event_id": "event123",
+    })
+
+    with (
+        patch("app.agent.tools._get_calendar_credentials", return_value=GCAL_CREDS),
+        patch("app.integrations.google_calendar.delete_event", mock_delete),
+    ):
+        result = json.loads(await execute_tool(
+            "cancel_appointment",
+            {"appointment_id": "event123", "reason": "Customer requested"},
+            gcal_tenant,
+        ))
+
+    assert result["status"] == "cancelled"
+    assert result["event_id"] == "event123"
+    mock_delete.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_cancel_appointment_splose(splose_tenant):
+    """cancel_appointment dispatches to Splose cancel_appointment."""
+    mock_cancel = AsyncMock(return_value={
+        "status": "cancelled",
+        "appointment_id": 55,
+    })
+
+    with (
+        patch("app.agent.tools._get_crm_credentials", return_value=SPLOSE_CREDS),
+        patch("app.integrations.splose.cancel_appointment", mock_cancel),
+    ):
+        result = json.loads(await execute_tool(
+            "cancel_appointment",
+            {"appointment_id": "55", "reason": "Patient unavailable"},
+            splose_tenant,
+        ))
+
+    assert result["status"] == "cancelled"
+    assert result["appointment_id"] == 55
+    mock_cancel.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_cancel_appointment_no_integration(test_tenant):
+    """cancel_appointment returns error when no calendar/CRM configured."""
+    result = json.loads(await execute_tool(
+        "cancel_appointment",
+        {"appointment_id": "123"},
+        test_tenant,
+    ))
+    assert "error" in result
+
+
+@pytest.mark.asyncio
+async def test_cancel_appointment_missing_id(gcal_tenant):
+    """cancel_appointment requires appointment_id."""
+    result = json.loads(await execute_tool(
+        "cancel_appointment",
+        {"reason": "No ID given"},
+        gcal_tenant,
+    ))
+    assert "error" in result

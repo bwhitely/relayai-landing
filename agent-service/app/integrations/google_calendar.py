@@ -176,3 +176,35 @@ async def create_event(
         "end": data.get("end", {}).get("dateTime", ""),
         "html_link": data.get("htmlLink", ""),
     }
+
+
+async def delete_event(
+    calendar_id: str,
+    event_id: str,
+    creds_dict: dict,
+) -> dict:
+    """Delete (cancel) an event on a Google Calendar.
+
+    Args:
+        calendar_id: The calendar ID.
+        event_id: The event ID to delete.
+        creds_dict: Dict with client_email, private_key.
+
+    Returns:
+        Dict with status and event_id.
+    """
+    token = get_access_token(creds_dict)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.delete(
+            f"{CALENDAR_API_BASE}/calendars/{calendar_id}/events/{event_id}",
+            headers=headers,
+        )
+        response.raise_for_status()
+
+    logger.info("Deleted Google Calendar event id=%s", event_id)
+    return {
+        "status": "cancelled",
+        "event_id": event_id,
+    }

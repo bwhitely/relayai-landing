@@ -275,3 +275,130 @@ async def create_appointment(
             "end": data.get("end", ""),
             "practitioner_id": data.get("practitionerId"),
         }
+
+
+async def list_appointments(
+    api_key: str,
+    patient_id: int | None = None,
+    practitioner_id: int | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> list[dict]:
+    """List appointments in Splose with optional filters.
+
+    Args:
+        api_key: Splose API key.
+        patient_id: Filter by patient.
+        practitioner_id: Filter by practitioner.
+        start_date: ISO datetime — only appointments after this.
+        end_date: ISO datetime — only appointments before this.
+
+    Returns:
+        List of appointments with id, start, end, patient/practitioner info.
+    """
+    params: dict = {}
+    if patient_id:
+        params["patientId"] = patient_id
+    if practitioner_id:
+        params["practitionerId"] = practitioner_id
+    if start_date:
+        params["update_gt"] = start_date
+    if end_date:
+        params["update_lt"] = end_date
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.get(
+            f"{SPLOSE_API_BASE}/appointments",
+            headers=_headers(api_key),
+            params=params,
+        )
+        response.raise_for_status()
+        data = response.json()
+
+    return [
+        {
+            "appointment_id": appt["id"],
+            "start": appt.get("start", ""),
+            "end": appt.get("end", ""),
+            "practitioner_id": appt.get("practitionerId"),
+            "patient_id": appt.get("patientId"),
+            "service_id": appt.get("serviceId"),
+            "location_id": appt.get("locationId"),
+            "note": appt.get("note", ""),
+            "status": (
+                appt.get("appointmentPatients", [{}])[0].get("status", "")
+                if appt.get("appointmentPatients")
+                else ""
+            ),
+        }
+        for appt in data.get("data", [])
+    ]
+
+
+async def get_appointment(appointment_id: int, api_key: str) -> dict:
+    """Get a single appointment by ID."""
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.get(
+            f"{SPLOSE_API_BASE}/appointments/{appointment_id}",
+            headers=_headers(api_key),
+        )
+        response.raise_for_status()
+        return response.json()
+
+
+async def cancel_appointment(
+    appointment_id: int,
+    api_key: str,
+    reason: str = "",
+) -> dict:
+    """Cancel an appointment in Splose.
+
+    Uses PUT to update the appointment with cancellation status.
+
+    Args:
+        appointment_id: The appointment ID.
+        api_key: Splose API key.
+        reason: Cancellation reason.
+
+    Returns:
+        Dict with status and appointment_id.
+    """
+    # GET current appointment to get required fields for PUT
+    current = await get_appointment(appointment_id, api_key)
+
+    # Build update body — Splose PUT requires the full appointment object
+    body: dict = {
+        "start": current["start"],
+        "end": current["end"],
+        "serviceId": current["serviceId"],
+        "locationId": current["locationId"],
+        "practitionerId": current["practitionerId"],
+        "patientId": current["patientId"],
+    }
+
+    # Set cancellation on the appointmentPatients array
+    if current.get("appointmentPatients"):
+        patients = current["appointmentPatients"]
+        patients[0]["status"] = "Cancelled"
+        if reason:
+            patients[0]["cancellationReason"] = reason
+        body["appointmentPatients"] = patients
+
+    if current.get("note"):
+        body["note"] = current["note"]
+    if reason and not body.get("note"):
+        body["note"] = f"Cancelled: {reason}"
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.put(
+            f"{SPLOSE_API_BASE}/appointments/{appointment_id}",
+            headers=_headers(api_key),
+            json=body,
+        )
+        response.raise_for_status()
+
+    logger.info("Cancelled Splose appointment id=%s", appointment_id)
+    return {
+        "status": "cancelled",
+        "appointment_id": appointment_id,
+    }
