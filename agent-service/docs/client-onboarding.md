@@ -4,6 +4,94 @@ Step-by-step process for onboarding a new client onto the RelayAI platform.
 
 ---
 
+## Quick-Start Checklist
+
+If you've done this before and just need the steps:
+
+- [ ] Discovery call completed — know which integrations they need
+- [ ] Create tenant via API (name, system_prompt, tools_config at minimum)
+- [ ] Set up CRM integration (HubSpot / Splose / Google Sheets)
+- [ ] Set up calendar integration (Google Calendar / Calendly / Splose)
+- [ ] Set up escalation channels (Slack webhook + email)
+- [ ] Set up Xero (if needed — OAuth flow)
+- [ ] Set up Twilio (WhatsApp and/or SMS webhook URLs)
+- [ ] Test all enabled tools via generic webhook
+- [ ] Walk client through test messages
+- [ ] Iterate on system prompt (2-3 rounds)
+- [ ] Go live — switch to production numbers
+
+---
+
+## Complete Worked Example: Minimal Tenant
+
+Here's a complete example creating a simple tenant with just HubSpot CRM and email escalation. This is the fastest way to get a client running.
+
+**Step 1: Create the tenant**
+
+```bash
+curl -X POST http://localhost:8000/admin/tenants \
+  -H "X-API-Key: YOUR_ADMIN_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Adelaide Plumbing Co",
+    "system_prompt": "You are a friendly receptionist for Adelaide Plumbing Co, based in Adelaide SA.\n\nAbout the business:\n- Emergency and scheduled plumbing services across Adelaide metro\n- Operating hours: Mon-Fri 7am-5pm, emergency callouts 24/7\n- Services: blocked drains, hot water systems, gas fitting, bathroom renovations\n\nYour job:\n- Greet customers warmly\n- Collect their name, phone, email, and a description of the issue\n- Save their details using create_lead\n- If it sounds urgent (flooding, gas leak, no hot water), escalate immediately using escalate_to_human\n- Otherwise, let them know someone will call back within 2 hours\n\nRules:\n- Keep responses short (2-3 sentences)\n- Never make up pricing — say \"we'\''d need to come have a look before quoting\"\n- If unsure, escalate to a human",
+    "tools_config": {"enabled": ["create_lead", "search_contacts", "escalate_to_human", "send_email"]},
+    "crm_type": "hubspot",
+    "crm_credentials": "pat-na1-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "escalation_config": {"email": "owner@adelaideplumbing.com.au"},
+    "max_conversations_per_month": 100
+  }'
+```
+
+Response (save the `id` and `api_key`):
+```json
+{
+  "id": "a1b2c3d4-...",
+  "api_key": "generated-random-key",
+  "name": "Adelaide Plumbing Co",
+  ...
+}
+```
+
+**Step 2: Test via generic webhook**
+
+```bash
+curl -X POST http://localhost:8000/webhooks/generic/TENANT_ID \
+  -H "X-API-Key: TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"sender_id": "test-user", "message": "Hi, I have a blocked drain in my kitchen"}'
+```
+
+**Step 3: Add more integrations later via update**
+
+```bash
+curl -X PUT http://localhost:8000/admin/tenants/TENANT_ID \
+  -H "X-API-Key: YOUR_ADMIN_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "calendar_type": "google_calendar",
+    "calendar_credentials": "{\"client_email\": \"...\", \"private_key\": \"...\", \"calendar_id\": \"...\"}",
+    "tools_config": {"enabled": ["create_lead", "search_contacts", "escalate_to_human", "send_email", "check_availability", "book_appointment"]},
+    "escalation_config": {"email": "owner@adelaideplumbing.com.au", "slack_webhook_url": "https://hooks.slack.com/services/T.../B.../xxx"}
+  }'
+```
+
+**Step 4: Check usage**
+
+```bash
+curl http://localhost:8000/admin/tenants/TENANT_ID/usage \
+  -H "X-API-Key: YOUR_ADMIN_KEY"
+```
+
+**Step 5: Review conversations**
+
+```bash
+curl http://localhost:8000/admin/tenants/TENANT_ID/conversations \
+  -H "X-API-Key: YOUR_ADMIN_KEY"
+```
+
+---
+
 ## Phase 1: Discovery (Before Signing)
 
 ### 1. Initial Contact
@@ -361,13 +449,35 @@ LOG_LEVEL=INFO
 
 ### 14. Internal Testing
 
-- Send test messages through the configured channels (WhatsApp, SMS, web widget)
-- Verify leads appear in the CRM with correct fields and lead status
-- If calendar is configured: test check_availability returns busy/free periods, and book_appointment creates events on the calendar (or returns a Calendly link)
-- If escalation is configured: trigger an escalation and verify Slack message / email arrives
-- If email is configured: test send_email delivers to the recipient
-- If Xero is configured: test search_invoices and check_payment_status return real data
-- Test edge cases: no name given, rude messages, requests to speak to a human, out-of-scope questions
+Send test messages through the configured channels (WhatsApp, SMS, web widget). For quick testing, use the generic webhook — no Twilio setup needed:
+
+```bash
+# Basic conversation test
+curl -X POST http://localhost:8000/webhooks/generic/TENANT_ID \
+  -H "X-API-Key: TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"sender_id": "test", "message": "Hi, I need to book an appointment"}'
+```
+
+**Verify each integration:**
+
+| Integration | How to test | What to check |
+|-------------|------------|---------------|
+| CRM (create_lead) | "My name is Jane Smith, email jane@test.com" | Lead appears in HubSpot/Splose/Sheet |
+| CRM (search_contacts) | "Can you check if I'm already in the system? My email is jane@test.com" | Returns matching contact |
+| Calendar (check_availability) | "What times are available next week?" | Returns real availability from calendar |
+| Calendar (book_appointment) | "Book me in for Monday at 9am" | Event appears on Google Calendar / Calendly link returned |
+| Escalation (Slack) | "I need to speak to someone right now" | Message appears in Slack channel |
+| Escalation (Email) | Same as above | Email arrives at configured address |
+| Send email | "Can you email me a confirmation at jane@test.com?" | Email arrives at recipient |
+| Xero (search_invoices) | "Can you check my invoices? My name is Jane Smith" | Returns invoice list from Xero |
+| Xero (check_payment_status) | "What's the status of invoice INV-0001?" | Returns payment details |
+
+**Edge case tests:**
+- No name given — agent should ask for it
+- Rude messages — agent should stay professional
+- Request to speak to a human — should trigger escalation
+- Out-of-scope questions — agent should say it can't help and offer to escalate
 - Check the admin dashboard Usage and Conversations tabs
 
 ### 15. Client Testing
