@@ -587,10 +587,13 @@
         top: -3px;
       }
 
+      /* ✅ Make branch items flow horizontally on desktop */
       .workflow-branch {
-        flex-direction: column;
+        flex-direction: row;       /* override the column */
+        flex-wrap: wrap;           /* wrap to next line if needed */
+        justify-content: center;   /* keep it centred */
         align-items: center;
-        gap: 0.5rem;
+        gap: 1rem;
       }
     }
 
@@ -1138,28 +1141,6 @@
               <h4>Customer Sorted</h4>
               <p>Instant reply, lead saved, job booked</p>
             </div>
-          </div>
-        </div>
-        <div class="workflow-branch" style="margin-top: 2rem;">
-          <div class="workflow-branch-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
-            Save to CRM
-          </div>
-          <div class="workflow-branch-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            Book appointment
-          </div>
-          <div class="workflow-branch-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Send email
-          </div>
-          <div class="workflow-branch-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
-            Escalate to human
-          </div>
-          <div class="workflow-branch-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-            Check invoices
           </div>
         </div>
       </div>
