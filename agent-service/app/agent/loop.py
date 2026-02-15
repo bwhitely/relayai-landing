@@ -15,6 +15,11 @@ FALLBACK_MESSAGE = (
     "Let me connect you with someone who can help."
 )
 
+# Keep only the last N messages from conversation history to cap token costs.
+# Each tool-use exchange produces 2 messages (assistant tool_use + user tool_result),
+# so 20 messages ≈ 5-10 conversational turns with tools.
+MAX_HISTORY_MESSAGES = 20
+
 
 @dataclass
 class AgentResult:
@@ -37,7 +42,12 @@ async def run_agent_loop(
     system_prompt = build_system_prompt(tenant)
     tools = get_tools_for_tenant(tenant)
 
-    # Append the new user message
+    # Truncate history to cap token costs, then append the new user message
+    if len(messages) > MAX_HISTORY_MESSAGES:
+        messages = messages[-MAX_HISTORY_MESSAGES:]
+        # Ensure first message is from user (Anthropic API requirement)
+        while messages and messages[0].get("role") != "user":
+            messages = messages[1:]
     messages = [*messages, {"role": "user", "content": user_message}]
 
     result = AgentResult(response_text="", messages=messages)

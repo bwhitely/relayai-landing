@@ -13,6 +13,8 @@ class ChannelType(str, enum.Enum):
     whatsapp = "whatsapp"
     web = "web"
     sms = "sms"
+    facebook = "facebook"
+    instagram = "instagram"
 
 
 class ConversationStatus(str, enum.Enum):

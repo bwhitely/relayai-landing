@@ -23,12 +23,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="RelayAI Agent Service", lifespan=lifespan)
 
+_cors_origins = get_settings().cors_origins.split(",") if get_settings().cors_origins else []
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[o.strip() for o in _cors_origins],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "X-API-Key", "Authorization"],
 )
 
 app.include_router(health.router)

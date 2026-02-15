@@ -39,6 +39,7 @@ async def create_tenant(
         crm_type=body.crm_type,
         calendar_type=body.calendar_type,
         accounting_type=body.accounting_type,
+        meta_page_id=body.meta_page_id,
         escalation_config=body.escalation_config,
         max_conversations_per_month=body.max_conversations_per_month,
         api_key=secrets.token_urlsafe(32),
@@ -50,6 +51,8 @@ async def create_tenant(
         tenant.calendar_credentials = encrypt(body.calendar_credentials)
     if body.accounting_credentials:
         tenant.accounting_credentials = encrypt(body.accounting_credentials)
+    if body.meta_credentials:
+        tenant.meta_credentials = encrypt(body.meta_credentials)
     if body.twilio_account_sid:
         tenant.twilio_account_sid = body.twilio_account_sid
     if body.twilio_auth_token:
@@ -93,6 +96,8 @@ async def update_tenant(
         update_data["accounting_credentials"] = encrypt(update_data["accounting_credentials"])
     if "twilio_auth_token" in update_data and update_data["twilio_auth_token"]:
         update_data["twilio_auth_token"] = encrypt(update_data["twilio_auth_token"])
+    if "meta_credentials" in update_data and update_data["meta_credentials"]:
+        update_data["meta_credentials"] = encrypt(update_data["meta_credentials"])
 
     for key, value in update_data.items():
         setattr(tenant, key, value)

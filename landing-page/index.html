@@ -598,6 +598,381 @@
       }
     }
 
+    /* ---- LIVE DEMO ---- */
+    .demo-section {
+      padding: 5rem 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .demo-split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      .demo-split {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+      }
+    }
+
+    .demo-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 420px;
+      max-height: 520px;
+    }
+
+    .demo-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .demo-panel-header svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+    }
+
+    /* Chat panel */
+    .demo-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .demo-msg {
+      max-width: 85%;
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      word-wrap: break-word;
+    }
+
+    .demo-msg.agent {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      border-bottom-left-radius: 3px;
+    }
+
+    .demo-msg.user {
+      background: var(--accent);
+      color: var(--bg);
+      align-self: flex-end;
+      border-bottom-right-radius: 3px;
+    }
+
+    .demo-typing {
+      display: none;
+      align-self: flex-start;
+      padding: 0.65rem 0.9rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      border-bottom-left-radius: 3px;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .demo-typing.visible {
+      display: flex;
+    }
+
+    .demo-typing-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: typingPulse 1.4s ease-in-out infinite;
+    }
+
+    .demo-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .demo-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingPulse {
+      0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+      30% { opacity: 1; transform: scale(1); }
+    }
+
+    .demo-chat-input {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .demo-chat-input input {
+      flex: 1;
+      padding: 0.6rem 0.85rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--text);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .demo-chat-input input:focus {
+      border-color: var(--accent);
+    }
+
+    .demo-chat-input input::placeholder {
+      color: #555;
+    }
+
+    .demo-chat-input button {
+      padding: 0.6rem 1rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .demo-chat-input button:hover {
+      background: var(--accent-hover);
+    }
+
+    .demo-chat-input button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Activity feed panel */
+    .demo-feed {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .demo-feed-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      gap: 0.5rem;
+      opacity: 0.6;
+    }
+
+    .demo-feed-card {
+      display: flex;
+      gap: 0.65rem;
+      padding: 0.7rem 0.85rem;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      animation: slideIn 0.3s ease-out;
+      transition: border-color 0.4s ease;
+    }
+
+    .demo-feed-card.resolved {
+      border-left-color: #3b8a3e;
+    }
+
+    .demo-feed-card.demo-mode {
+      border-left-color: #c97a1e;
+    }
+
+    .demo-feed-card.system {
+      border-left-color: #555;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .demo-feed-card.thinking {
+      border-left-color: var(--accent);
+    }
+
+    .demo-thinking-dots {
+      display: inline-flex;
+      gap: 3px;
+      align-items: center;
+      margin-left: 2px;
+    }
+
+    .demo-thinking-dots span {
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: thinkingPulse 1.4s ease-in-out infinite;
+    }
+
+    .demo-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .demo-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes thinkingPulse {
+      0%, 60%, 100% { opacity: 0.25; }
+      30% { opacity: 1; }
+    }
+
+    .demo-feed-card-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .demo-feed-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .demo-feed-card-title {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .demo-feed-card-status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .demo-feed-card-result {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .demo-feed-card-result .demo-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(201, 122, 30, 0.15);
+      color: #e5a83a;
+      margin-top: 0.25rem;
+    }
+
+    .demo-spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Starters + reset */
+    .demo-starters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .demo-starters span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      align-self: center;
+    }
+
+    .demo-starter-btn {
+      padding: 0.45rem 0.9rem;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      color: var(--text);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .demo-starter-btn:hover {
+      border-color: var(--accent);
+      background: var(--bg-elevated);
+    }
+
+    .demo-reset {
+      display: block;
+      margin: 0.75rem auto 0;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .demo-reset:hover {
+      color: var(--text);
+    }
+
     /* ---- HOW IT WORKS ---- */
     #how-it-works {
       border-top: 1px solid var(--border);
@@ -974,6 +1349,7 @@
   <nav>
     <a href="#" class="nav-wordmark">Relay<span>AI</span></a>
     <ul class="nav-links">
+      <li><a href="#demo">Live Demo</a></li>
       <li><a href="#how-it-works">How It Works</a></li>
       <li><a href="#what-it-does">What It Does</a></li>
       <li><a href="#pricing">Pricing</a></li>
@@ -988,6 +1364,7 @@
 
   <!-- MOBILE MENU -->
   <div class="mobile-menu">
+    <a href="#demo">Live Demo</a>
     <a href="#how-it-works">How It Works</a>
     <a href="#what-it-does">What It Does</a>
     <a href="#who-its-for">Who It's For</a>
@@ -1051,6 +1428,14 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           <span>SMS</span>
         </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1877F2" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          <span>Messenger</span>
+        </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E4405F" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#E4405F" stroke="none"/></svg>
+          <span>Instagram</span>
+        </div>
         <!-- Duplicate set for seamless loop -->
         <div class="logo-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#25D366"/></svg>
@@ -1092,6 +1477,14 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           <span>SMS</span>
         </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1877F2" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          <span>Messenger</span>
+        </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E4405F" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#E4405F" stroke="none"/></svg>
+          <span>Instagram</span>
+        </div>
       </div>
     </div>
 
@@ -1110,7 +1503,7 @@
             </div>
             <div>
               <h4>Customer Messages</h4>
-              <p>WhatsApp, SMS, or web chat</p>
+              <p>WhatsApp, SMS, Messenger, Instagram, or web chat</p>
             </div>
           </div>
           <div class="workflow-connector"></div>
@@ -1144,6 +1537,58 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- LIVE DEMO -->
+    <section class="demo-section" id="demo">
+      <div class="container">
+        <div class="demo-header">
+          <p class="section-label">See It In Action</p>
+          <h2 class="section-heading">Try our AI agent. Watch what happens behind the scenes.</h2>
+          <p class="section-sub" style="margin: 0 auto;">Send a message and see the tools the agent uses in real time &mdash; CRM lookups, calendar checks, bookings &mdash; just like it would for your business.</p>
+        </div>
+        <div class="demo-split">
+          <!-- Chat Panel -->
+          <div class="demo-panel">
+            <div class="demo-panel-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Customer View
+            </div>
+            <div class="demo-chat-messages" id="demo-messages">
+              <div class="demo-msg agent">Hi! I'm the AI assistant for Adelaide Wellness Clinic. I can help with bookings, availability, or answer questions. How can I help?</div>
+              <div class="demo-typing" id="demo-typing">
+                <div class="demo-typing-dot"></div>
+                <div class="demo-typing-dot"></div>
+                <div class="demo-typing-dot"></div>
+              </div>
+            </div>
+            <div class="demo-chat-input">
+              <input type="text" id="demo-input" placeholder="Type a message..." autocomplete="off">
+              <button id="demo-send">Send</button>
+            </div>
+          </div>
+          <!-- Activity Feed Panel -->
+          <div class="demo-panel">
+            <div class="demo-panel-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Behind the Scenes
+            </div>
+            <div class="demo-feed" id="demo-feed">
+              <div class="demo-feed-empty" id="demo-feed-empty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                Agent actions will appear here as you chat
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-starters">
+          <span>Try asking:</span>
+          <button class="demo-starter-btn" onclick="sendDemoMessage('I\'d like to book an appointment')">Book an appointment</button>
+          <button class="demo-starter-btn" onclick="sendDemoMessage('Do you have availability this week?')">Check availability</button>
+          <button class="demo-starter-btn" onclick="sendDemoMessage('I need to speak to someone')">Speak to someone</button>
+        </div>
+        <button class="demo-reset" onclick="resetDemo()">Reset conversation</button>
       </div>
     </section>
 
@@ -1460,6 +1905,369 @@
           var errorEl = form.querySelector('.form-error[data-field="' + name + '"]');
           if (errorEl) errorEl.classList.remove('visible');
         });
+      });
+    })();
+
+    // ---- LIVE DEMO ----
+    (function () {
+      var DEMO_CONFIG = {
+        tenantId: '579aa5cc-a033-4c04-8abb-c2d37e1ee575',
+        apiKey: 'iktxHKSuSgxOXJtPZndvs0IaIzqQrTVFiYzup5XvZBE',
+        apiUrl: 'https://uninspissated-roughly-christy.ngrok-free.dev',
+      };
+
+      var demoSenderId = 'demo-' + Math.random().toString(36).substring(2, 10);
+      var demoSending = false;
+
+      var messagesEl = document.getElementById('demo-messages');
+      var typingEl = document.getElementById('demo-typing');
+      var feedEl = document.getElementById('demo-feed');
+      var feedEmptyEl = document.getElementById('demo-feed-empty');
+      var inputEl = document.getElementById('demo-input');
+      var sendBtn = document.getElementById('demo-send');
+
+      var TOOL_DISPLAY = {
+        create_lead:          { icon: '\uD83D\uDCCB', title: 'Saving customer details' },
+        update_lead:          { icon: '\uD83D\uDCCB', title: 'Updating customer record' },
+        search_contacts:      { icon: '\uD83D\uDD0D', title: 'Looking up customer' },
+        check_availability:   { icon: '\uD83D\uDCC5', title: 'Checking available times' },
+        book_appointment:     { icon: '\uD83D\uDCC5', title: 'Booking appointment' },
+        list_appointments:    { icon: '\uD83D\uDCC5', title: 'Fetching appointments' },
+        cancel_appointment:   { icon: '\uD83D\uDCC5', title: 'Cancelling appointment' },
+        escalate_to_human:    { icon: '\uD83D\uDEA8', title: 'Alerting team member' },
+        send_email:           { icon: '\uD83D\uDCE7', title: 'Sending email' },
+        search_invoices:      { icon: '\uD83D\uDCB0', title: 'Searching invoices' },
+        check_payment_status: { icon: '\uD83D\uDCB0', title: 'Checking payment' },
+        echo:                 { icon: '\uD83D\uDD27', title: 'Testing' },
+      };
+
+      function getToolDisplay(toolName) {
+        return TOOL_DISPLAY[toolName] || { icon: '\u2699\uFE0F', title: toolName };
+      }
+
+      function formatToolResult(toolName, result) {
+        if (typeof result === 'object' && result !== null) {
+          if (result.error) {
+            return null; // handled as demo mode
+          }
+          if (toolName === 'check_availability' && result.slots) {
+            return result.slots.length + ' time slot(s) available';
+          }
+          if (toolName === 'create_lead' && (result.firstname || result.firstName)) {
+            return 'Created contact: ' + (result.firstname || result.firstName) + ' ' + (result.lastname || result.lastName || '');
+          }
+          if (toolName === 'search_contacts' && Array.isArray(result.contacts)) {
+            return result.contacts.length + ' record(s) found';
+          }
+          if (toolName === 'book_appointment' && result.summary) {
+            return 'Confirmed: ' + result.summary;
+          }
+          if (toolName === 'escalate_to_human') {
+            return 'Team notified';
+          }
+          if (toolName === 'send_email' && result.to_email) {
+            return 'Email sent to ' + result.to_email;
+          }
+          if (toolName === 'search_invoices' && Array.isArray(result.invoices)) {
+            return result.invoices.length + ' invoice(s) found';
+          }
+          if (toolName === 'check_payment_status' && result.status) {
+            return 'Status: ' + result.status;
+          }
+        }
+        if (typeof result === 'string' && result.length > 0 && result.length < 120) {
+          return result;
+        }
+        return 'Completed';
+      }
+
+      function renderChatMessage(role, text) {
+        var div = document.createElement('div');
+        div.className = 'demo-msg ' + role;
+        div.textContent = text;
+        messagesEl.insertBefore(div, typingEl);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      var TOOL_PROCESSING_TEXT = {
+        create_lead:          'Writing to CRM...',
+        update_lead:          'Updating CRM record...',
+        search_contacts:      'Searching customer database...',
+        check_availability:   'Querying calendar system...',
+        book_appointment:     'Confirming appointment slot...',
+        list_appointments:    'Pulling appointment records...',
+        cancel_appointment:   'Processing cancellation...',
+        escalate_to_human:    'Notifying team via Slack & email...',
+        send_email:           'Composing and sending email...',
+        search_invoices:      'Querying accounting system...',
+        check_payment_status: 'Looking up payment records...',
+        echo:                 'Running test...',
+      };
+
+      function renderToolCall(tc, resolveDelay) {
+        if (feedEmptyEl) {
+          feedEmptyEl.style.display = 'none';
+        }
+
+        var display = getToolDisplay(tc.tool);
+        var isError = typeof tc.result === 'object' && tc.result !== null && tc.result.error;
+        var processingText = TOOL_PROCESSING_TEXT[tc.tool] || 'Processing...';
+
+        var card = document.createElement('div');
+        card.className = 'demo-feed-card';
+
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'demo-feed-card-icon';
+        iconSpan.textContent = display.icon;
+
+        var body = document.createElement('div');
+        body.className = 'demo-feed-card-body';
+
+        var title = document.createElement('div');
+        title.className = 'demo-feed-card-title';
+        title.textContent = display.title;
+
+        // Phase 1: processing state
+        var statusDiv = document.createElement('div');
+        statusDiv.className = 'demo-feed-card-status';
+
+        var spinner = document.createElement('div');
+        spinner.className = 'demo-spinner';
+        statusDiv.appendChild(spinner);
+
+        var statusText = document.createElement('span');
+        statusText.textContent = processingText;
+        statusDiv.appendChild(statusText);
+
+        body.appendChild(title);
+        body.appendChild(statusDiv);
+        card.appendChild(iconSpan);
+        card.appendChild(body);
+        feedEl.appendChild(card);
+        feedEl.scrollTop = feedEl.scrollHeight;
+
+        // Phase 2: resolve with result after delay
+        var delay = resolveDelay || 600;
+        setTimeout(function () {
+          statusDiv.remove();
+
+          var resultDiv = document.createElement('div');
+          resultDiv.className = 'demo-feed-card-result';
+
+          if (isError) {
+            card.className = 'demo-feed-card demo-mode';
+            resultDiv.innerHTML = '\u26A0\uFE0F ' + (tc.result.error || 'Not configured') + '<br><span class="demo-badge">Demo mode \u2014 in production this connects to your systems</span>';
+          } else {
+            card.className = 'demo-feed-card resolved';
+            var summary = formatToolResult(tc.tool, tc.result);
+            resultDiv.textContent = '\u2713 ' + summary;
+          }
+
+          body.appendChild(resultDiv);
+          feedEl.scrollTop = feedEl.scrollHeight;
+        }, delay);
+      }
+
+      function setDemoSending(sending) {
+        demoSending = sending;
+        sendBtn.disabled = sending;
+        inputEl.disabled = sending;
+        if (sending) {
+          typingEl.classList.add('visible');
+        } else {
+          typingEl.classList.remove('visible');
+        }
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function renderSystemCard(icon, title, statusText) {
+        if (feedEmptyEl) feedEmptyEl.style.display = 'none';
+        var card = document.createElement('div');
+        card.className = 'demo-feed-card system';
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'demo-feed-card-icon';
+        iconSpan.textContent = icon;
+        var body = document.createElement('div');
+        body.className = 'demo-feed-card-body';
+        var titleDiv = document.createElement('div');
+        titleDiv.className = 'demo-feed-card-title';
+        titleDiv.textContent = title;
+        var statusDiv = document.createElement('div');
+        statusDiv.className = 'demo-feed-card-status';
+        statusDiv.textContent = statusText;
+        body.appendChild(titleDiv);
+        body.appendChild(statusDiv);
+        card.appendChild(iconSpan);
+        card.appendChild(body);
+        feedEl.appendChild(card);
+        feedEl.scrollTop = feedEl.scrollHeight;
+        return card;
+      }
+
+      function renderThinkingCard() {
+        if (feedEmptyEl) feedEmptyEl.style.display = 'none';
+        var card = document.createElement('div');
+        card.className = 'demo-feed-card thinking';
+        card.id = 'demo-thinking-card';
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'demo-feed-card-icon';
+        iconSpan.textContent = '\uD83E\uDDE0';
+        var body = document.createElement('div');
+        body.className = 'demo-feed-card-body';
+        var titleDiv = document.createElement('div');
+        titleDiv.className = 'demo-feed-card-title';
+        titleDiv.textContent = 'Agent thinking';
+        var statusDiv = document.createElement('div');
+        statusDiv.className = 'demo-feed-card-status';
+
+        var spinner = document.createElement('div');
+        spinner.className = 'demo-spinner';
+        statusDiv.appendChild(spinner);
+
+        var statusText = document.createElement('span');
+        statusText.textContent = 'Analyzing message and deciding actions';
+        statusText.id = 'demo-thinking-text';
+        statusDiv.appendChild(statusText);
+
+        var dots = document.createElement('span');
+        dots.className = 'demo-thinking-dots';
+        dots.innerHTML = '<span></span><span></span><span></span>';
+        statusDiv.appendChild(dots);
+
+        body.appendChild(titleDiv);
+        body.appendChild(statusDiv);
+        card.appendChild(iconSpan);
+        card.appendChild(body);
+        feedEl.appendChild(card);
+        feedEl.scrollTop = feedEl.scrollHeight;
+        return card;
+      }
+
+      function resolveThinkingCard(thinkingCard, hadTools) {
+        if (!thinkingCard) return;
+        thinkingCard.className = 'demo-feed-card system';
+        var body = thinkingCard.querySelector('.demo-feed-card-body');
+        var status = thinkingCard.querySelector('.demo-feed-card-status');
+        if (status) {
+          status.innerHTML = '';
+          status.textContent = hadTools ? '\u2713 Identified actions to take' : '\u2713 Composed response';
+        }
+      }
+
+      window.sendDemoMessage = function (text) {
+        if (demoSending || !text.trim()) return;
+
+        renderChatMessage('user', text);
+        setDemoSending(true);
+
+        // Step 1: show "message received" in feed
+        renderSystemCard('\uD83D\uDCE8', 'Message received', 'Via web chat');
+
+        // Step 2: show "agent thinking" after a short beat
+        var thinkingCard;
+        setTimeout(function () {
+          thinkingCard = renderThinkingCard();
+        }, 400);
+
+        var url = DEMO_CONFIG.apiUrl + '/webhooks/generic/' + DEMO_CONFIG.tenantId + '?include_tool_calls=true';
+
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': DEMO_CONFIG.apiKey,
+          },
+          body: JSON.stringify({
+            sender_id: demoSenderId,
+            message: text,
+          }),
+        })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Request failed: ' + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          setDemoSending(false);
+          var hasTools = data.tool_calls && data.tool_calls.length > 0;
+
+          // Step 3: resolve thinking card
+          var thinkResolveDelay = 600;
+          setTimeout(function () {
+            resolveThinkingCard(thinkingCard, hasTools);
+          }, thinkResolveDelay);
+
+          if (hasTools) {
+            // Step 4: stagger tool call cards
+            var CARD_STAGGER = 800;
+            var RESOLVE_DELAY = 600;
+            var toolDelay = thinkResolveDelay + 400;
+            data.tool_calls.forEach(function (tc) {
+              setTimeout(function () { renderToolCall(tc, RESOLVE_DELAY); }, toolDelay);
+              toolDelay += CARD_STAGGER;
+            });
+            // Step 5: "composing response" then agent message
+            var composeDelay = toolDelay + RESOLVE_DELAY + 200;
+            setTimeout(function () {
+              renderSystemCard('\u270D\uFE0F', 'Composing response', 'Formatting reply for customer');
+            }, composeDelay);
+            setTimeout(function () {
+              renderChatMessage('agent', data.response);
+            }, composeDelay + 600);
+          } else {
+            // No tools — just composing step then message
+            var noToolDelay = thinkResolveDelay + 400;
+            setTimeout(function () {
+              renderSystemCard('\u270D\uFE0F', 'Composing response', 'Formatting reply for customer');
+            }, noToolDelay);
+            setTimeout(function () {
+              renderChatMessage('agent', data.response);
+            }, noToolDelay + 600);
+          }
+        })
+        .catch(function (err) {
+          setDemoSending(false);
+          resolveThinkingCard(thinkingCard, false);
+          renderChatMessage('agent', 'Sorry, the demo is temporarily unavailable. Please try again later.');
+          console.error('Demo error:', err);
+        });
+      };
+
+      window.resetDemo = function () {
+        demoSenderId = 'demo-' + Math.random().toString(36).substring(2, 10);
+
+        // Clear chat messages except the initial greeting
+        var msgs = messagesEl.querySelectorAll('.demo-msg');
+        msgs.forEach(function (msg, i) {
+          if (i > 0) msg.remove();
+        });
+
+        // Clear feed
+        var cards = feedEl.querySelectorAll('.demo-feed-card');
+        cards.forEach(function (c) { c.remove(); });
+        if (feedEmptyEl) feedEmptyEl.style.display = '';
+
+        inputEl.value = '';
+        setDemoSending(false);
+      };
+
+      // Send on click or Enter
+      sendBtn.addEventListener('click', function () {
+        var text = inputEl.value.trim();
+        if (text) {
+          inputEl.value = '';
+          sendDemoMessage(text);
+        }
+      });
+
+      inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          var text = inputEl.value.trim();
+          if (text) {
+            inputEl.value = '';
+            sendDemoMessage(text);
+          }
+        }
       });
     })();
   </script>

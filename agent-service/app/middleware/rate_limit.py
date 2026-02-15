@@ -39,9 +39,9 @@ _webhook_limiter = RateLimiter(max_requests=30, window_seconds=60)
 
 
 def get_client_ip(request: Request) -> str:
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+    # Use the direct connection IP — X-Forwarded-For can be spoofed by clients.
+    # When deployed behind a trusted reverse proxy (Railway, nginx, etc.),
+    # the proxy sets the real client IP as the direct connection.
     return request.client.host if request.client else "unknown"
 
 

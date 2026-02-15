@@ -1,3 +1,4 @@
+import html
 import json
 import logging
 from dataclasses import dataclass
@@ -56,9 +57,9 @@ async def execute_tool(
     try:
         result = await definition.handler(tool_input, tenant)
         return json.dumps(result)
-    except Exception as e:
+    except Exception:
         logger.error("Tool execution failed: %s", tool_name, exc_info=True)
-        return json.dumps({"error": "Tool execution failed", "detail": str(e)})
+        return json.dumps({"error": "Tool execution failed — please try again or escalate to a human"})
 
 
 # --- Built-in tools ---
@@ -124,12 +125,12 @@ async def _escalate_to_human_handler(tool_input: dict, tenant: Tenant) -> dict:
             if api_key:
                 html_body = (
                     f"<h2>Escalation Required</h2>"
-                    f"<p><strong>Business:</strong> {tenant.name}</p>"
-                    f"<p><strong>Customer:</strong> {sender_id}</p>"
-                    f"<p><strong>Reason:</strong> {reason}</p>"
+                    f"<p><strong>Business:</strong> {html.escape(tenant.name)}</p>"
+                    f"<p><strong>Customer:</strong> {html.escape(sender_id)}</p>"
+                    f"<p><strong>Reason:</strong> {html.escape(reason)}</p>"
                 )
                 if summary:
-                    html_body += f"<p><strong>Summary:</strong> {summary}</p>"
+                    html_body += f"<p><strong>Summary:</strong> {html.escape(summary)}</p>"
                 await send_email(
                     api_key=api_key,
                     from_addr=settings.default_from_email,

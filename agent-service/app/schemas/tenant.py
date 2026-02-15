@@ -19,6 +19,8 @@ class TenantCreate(BaseModel):
     twilio_auth_token: str | None = None
     accounting_type: AccountingType = AccountingType.none
     accounting_credentials: str | None = None
+    meta_page_id: str | None = None
+    meta_credentials: str | None = None
     escalation_config: dict | None = None
     max_conversations_per_month: int = 100
 
@@ -36,6 +38,8 @@ class TenantUpdate(BaseModel):
     accounting_credentials: str | None = None
     twilio_account_sid: str | None = None
     twilio_auth_token: str | None = None
+    meta_page_id: str | None = None
+    meta_credentials: str | None = None
     escalation_config: dict | None = None
     max_conversations_per_month: int | None = None
     is_active: bool | None = None
@@ -50,6 +54,7 @@ class TenantResponse(BaseModel):
     crm_type: CRMType
     calendar_type: CalendarType
     accounting_type: AccountingType
+    meta_page_id: str | None
     escalation_config: dict | None
     max_conversations_per_month: int
     is_active: bool

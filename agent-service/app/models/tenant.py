@@ -55,6 +55,8 @@ class Tenant(Base):
         Enum(AccountingType), default=AccountingType.none, nullable=False
     )
     accounting_credentials: Mapped[str | None] = mapped_column(Text, nullable=True)
+    meta_page_id: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    meta_credentials: Mapped[str | None] = mapped_column(Text, nullable=True)
     escalation_config: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     max_conversations_per_month: Mapped[int] = mapped_column(
         Integer, default=100, nullable=False

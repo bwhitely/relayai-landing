@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     agent_timeout_seconds: int = 30
     resend_api_key: str = ""
     default_from_email: str = "noreply@relayai.com.au"
+    cors_origins: str = "https://www.relayai.com.au,https://relayai.com.au"
     log_level: str = "INFO"
 
     model_config = SettingsConfigDict(env_file=".env")

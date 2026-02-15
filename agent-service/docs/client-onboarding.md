@@ -15,6 +15,7 @@ If you've done this before and just need the steps:
 - [ ] Set up escalation channels (Slack webhook + email)
 - [ ] Set up Xero (if needed — OAuth flow)
 - [ ] Set up Twilio (WhatsApp and/or SMS webhook URLs)
+- [ ] Set up Meta (Facebook Messenger and/or Instagram DMs)
 - [ ] Test all enabled tools via generic webhook
 - [ ] Walk client through test messages
 - [ ] Iterate on system prompt (2-3 rounds)
@@ -118,7 +119,7 @@ Based on discovery, determine:
 
 | Decision | Options |
 |----------|---------|
-| **Channel** | WhatsApp, SMS, web chat widget, or any combination |
+| **Channel** | WhatsApp, SMS, Facebook Messenger, Instagram DMs, web chat widget, or any combination |
 | **CRM integration** | HubSpot (general), Splose (allied health), Google Sheets (simple/budget), or none |
 | **Calendar integration** | Google Calendar (general), Calendly (self-service booking), Splose (allied health via CRM), or none |
 | **Accounting integration** | Xero (invoicing/payments), or none |
@@ -163,7 +164,7 @@ curl -X POST http://localhost:8000/admin/tenants \
   }'
 ```
 
-All credential fields (`crm_credentials`, `calendar_credentials`, `accounting_credentials`, `twilio_auth_token`) are encrypted at rest automatically.
+All credential fields (`crm_credentials`, `calendar_credentials`, `accounting_credentials`, `twilio_auth_token`, `meta_credentials`) are encrypted at rest automatically.
 
 ### 6. Write the System Prompt
 
@@ -387,7 +388,60 @@ SMS uses the same Twilio infrastructure as WhatsApp. A single phone number can h
 
 > **Same number, both channels:** Twilio keeps WhatsApp and SMS webhooks separate. You can point WhatsApp to `/webhooks/twilio/whatsapp` and SMS to `/webhooks/twilio/sms` on the same phone number. Conversations are tracked separately per channel.
 
-### 13. Deploy Chat Widget (if applicable)
+### 13. Set Up Facebook Messenger / Instagram DMs (if applicable)
+
+Both Facebook Messenger and Instagram DMs are handled through Meta's Graph API via a single webhook endpoint. One Meta App can handle both channels for a client.
+
+**One-time setup (your Meta developer account):**
+1. Go to https://developers.facebook.com — create a developer account if you don't have one
+2. Create a new App: **Create App > Business > Business Type: Other**
+3. Add the **Messenger** product to the app
+4. If the client also wants Instagram DMs, add the **Instagram** product
+
+**Per-client setup:**
+
+1. **Connect the client's Facebook Page:**
+   - In your Meta App settings, go to **Messenger > Settings**
+   - Under "Access Tokens", click **Add or Remove Pages**
+   - The client logs in and selects their Facebook Business Page
+   - Click **Generate Token** for their page — this is the `page_access_token`
+   - Note the **Page ID** (shown next to the page name) — this is the `meta_page_id`
+
+2. **Configure the webhook:**
+   - In **Messenger > Settings > Webhooks**, click **Add Callback URL**
+   - Callback URL: `https://yourdomain.com/webhooks/meta`
+   - Verify Token: choose any string (e.g. `relay-verify-abc123`) — this is the `verify_token`
+   - Click **Verify and Save** (the platform will send a GET request to your endpoint)
+   - Subscribe to the `messages` webhook field
+
+3. **For Instagram DMs (optional):**
+   - In the Meta App, go to **Instagram > Settings**
+   - Connect the client's Instagram Professional/Business account (must be linked to their Facebook Page)
+   - Subscribe to the `messages` webhook field for Instagram
+   - Instagram DMs use the same webhook URL and same Page Access Token
+
+4. **Get the App Secret:**
+   - Go to **App Settings > Basic**
+   - Copy the **App Secret** — this is used to validate webhook signatures
+
+5. **Update the tenant:**
+   ```bash
+   curl -X PUT http://localhost:8000/admin/tenants/TENANT_ID \
+     -H "X-API-Key: YOUR_ADMIN_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "meta_page_id": "123456789012345",
+       "meta_credentials": "{\"app_secret\": \"your-meta-app-secret\", \"page_access_token\": \"EAAxxxxxxx...\", \"verify_token\": \"relay-verify-abc123\"}"
+     }'
+   ```
+
+> **How it works:** Meta sends both Messenger and Instagram webhooks to the same URL. The system automatically detects which channel the message came from and tracks conversations separately as `facebook` or `instagram` channel types.
+
+> **Background processing:** Unlike WhatsApp/SMS (which are synchronous), Meta requires a response within 5 seconds. The endpoint returns `200` immediately and processes the message + sends the reply in a background task. If the agent loop fails, a fallback message is sent.
+
+> **Message limits:** Meta has a 2000-character message limit. Long agent replies are automatically split into multiple messages.
+
+### 14. Deploy Chat Widget (if applicable)
 
 See [Widget Integration Guide](widget-integration.md) for full details.
 
@@ -437,6 +491,7 @@ LOG_LEVEL=INFO
 | **Twilio** | You (or per-client) | Shared fallback + per-client override | Account SID + Auth Token in `.env`; client's own SID/token optional on tenant |
 | **Resend** | You | Shared — one API key for all tenants | API key in `.env`; must verify your sending domain in Resend dashboard |
 | **Slack** | You (or client) | Per-client — each tenant gets their own webhook URL | Client creates app or you add webhooks per channel |
+| **Meta (Messenger/IG)** | You (Meta App) + Client (connects page) | Shared app, per-client page connection | You register ONE Meta App; each client connects their Facebook Page and generates a Page Access Token |
 | **HubSpot** | Client | Per-client | Client creates a Private App, gives you the token |
 | **Google Calendar** | You (service account) | Shared service account, per-client calendar sharing | One service account; each client shares their calendar with it |
 | **Calendly** | Client | Per-client | Client creates Personal Access Token, gives you that + event type URI |
@@ -449,7 +504,7 @@ LOG_LEVEL=INFO
 
 ### 14. Internal Testing
 
-Send test messages through the configured channels (WhatsApp, SMS, web widget). For quick testing, use the generic webhook — no Twilio setup needed:
+Send test messages through the configured channels (WhatsApp, SMS, Messenger, Instagram, web widget). For quick testing, use the generic webhook — no Twilio setup needed:
 
 ```bash
 # Basic conversation test
@@ -503,7 +558,7 @@ curl -X POST http://localhost:8000/webhooks/generic/TENANT_ID \
 ### 17. Handover
 
 - Send the client a summary email:
-  - What's been set up (channels, CRM, calendar, escalation, accounting)
+  - What's been set up (channels — WhatsApp/SMS/Messenger/Instagram/web, CRM, calendar, escalation, accounting)
   - How to check their CRM for new leads
   - If calendar is configured: how bookings will appear on their calendar
   - If Slack is configured: which channel to watch for escalations
@@ -537,6 +592,8 @@ curl -X POST http://localhost:8000/webhooks/generic/TENANT_ID \
 | Slack notifications not arriving | Test the webhook URL directly: `curl -X POST -H "Content-Type: application/json" -d '{"text":"test"}' WEBHOOK_URL` |
 | Email not sending | Check `RESEND_API_KEY` is set in `.env`; verify sending domain in Resend dashboard |
 | Email going to spam | Set up SPF/DKIM/DMARC for your sending domain in Resend |
+| Messenger/Instagram not responding | Check `meta_page_id` matches the Page ID in Meta App dashboard; verify the webhook subscription is active and subscribed to `messages`; check the `page_access_token` hasn't expired (generate a long-lived token or use a system user token) |
+| Meta webhook verification failing | Check the `verify_token` in `meta_credentials` matches what you entered in the Meta App webhook settings |
 | WhatsApp not responding | Check Twilio webhook URL, check ngrok/tunnel is running, check logs |
 | SMS not responding | Check Twilio SMS webhook URL is set to `/webhooks/twilio/sms` (not the WhatsApp URL) |
 | Widget not loading | Check CORS settings, verify the script src URL is correct |
@@ -557,6 +614,8 @@ curl -X POST http://localhost:8000/webhooks/generic/TENANT_ID \
 | Email (Resend) | `escalation_config.email` | `RESEND_API_KEY` in .env (or per-tenant override) | API key |
 | WhatsApp | `twilio_phone_number` | `twilio_account_sid` + `twilio_auth_token` | API key |
 | SMS | `twilio_phone_number` | `twilio_account_sid` + `twilio_auth_token` | API key |
+| Facebook Messenger | `meta_page_id` | `meta_credentials` (JSON: app_secret, page_access_token, verify_token) | Page Access Token |
+| Instagram DMs | `meta_page_id` | `meta_credentials` (same as Messenger) | Page Access Token |
 
 ## Available Tools (10 total)
 
