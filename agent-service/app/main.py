@@ -1,3 +1,4 @@
+import logging
 import pathlib
 from contextlib import asynccontextmanager
 
@@ -11,11 +12,33 @@ from app.database import close_db, init_db
 from app.routers import health, tenants, webhooks
 from app.utils.logging import setup_logging
 
+logger = logging.getLogger(__name__)
+
+
+def _run_migrations() -> None:
+    """Run alembic migrations programmatically (uses DATABASE_URL from env)."""
+    from alembic import command
+    from alembic.config import Config
+
+    alembic_cfg = Config(
+        str(pathlib.Path(__file__).parent.parent / "alembic.ini")
+    )
+    alembic_cfg.set_main_option(
+        "script_location",
+        str(pathlib.Path(__file__).parent.parent / "alembic"),
+    )
+    command.upgrade(alembic_cfg, "head")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
     setup_logging(settings.log_level)
+    try:
+        _run_migrations()
+        logger.info("Database migrations complete")
+    except Exception:
+        logger.exception("Migration failed — starting anyway")
     init_db(settings.database_url)
     yield
     await close_db()

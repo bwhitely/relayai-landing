@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 from logging.config import fileConfig
 
 from alembic import context
@@ -17,6 +18,9 @@ if config.config_file_name is not None:
 # Use DATABASE_URL from environment if available, otherwise fall back to alembic.ini
 database_url = os.environ.get("DATABASE_URL")
 if database_url:
+    # Ensure async driver is specified
+    if database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
     config.set_main_option("sqlalchemy.url", database_url)
 
 target_metadata = Base.metadata
@@ -41,17 +45,36 @@ def do_run_migrations(connection):
 
 
 async def run_async_migrations() -> None:
+    url = config.get_main_option("sqlalchemy.url")
+    print(f"Connecting to database...", file=sys.stderr)
     connectable = create_async_engine(
-        config.get_main_option("sqlalchemy.url"),
+        url,
         poolclass=pool.NullPool,
+        connect_args={"timeout": 10},
     )
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-    await connectable.dispose()
+    try:
+        async with connectable.connect() as connection:
+            print("Connected. Running migrations...", file=sys.stderr)
+            await connection.run_sync(do_run_migrations)
+        print("Migrations complete.", file=sys.stderr)
+    finally:
+        await connectable.dispose()
 
 
 def run_migrations_online() -> None:
-    asyncio.run(run_async_migrations())
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        # Called from within an async context (e.g. FastAPI lifespan)
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(asyncio.run, run_async_migrations())
+            future.result()
+    else:
+        asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():
