@@ -1,18 +1,22 @@
 FROM python:3.12-slim
 
 # Run as non-root user
-RUN groupadd -r app && useradd -r -g app app
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-WORKDIR /app
+WORKDIR /srv
 
 # Install dependencies first (layer caching)
 COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 
+# Copy source code
 COPY . .
 
+# Install the app package itself
+RUN pip install --no-cache-dir -e .
+
 # Switch to non-root user
-USER app
+USER appuser
 
 EXPOSE 8000
 
