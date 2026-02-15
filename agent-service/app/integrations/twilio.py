@@ -11,7 +11,14 @@ logger = logging.getLogger(__name__)
 def validate_twilio_signature(url: str, params: dict, signature: str) -> bool:
     settings = get_settings()
     validator = RequestValidator(settings.twilio_auth_token)
-    return validator.validate(url, params, signature)
+    # Behind a reverse proxy (e.g. Railway), request.url may show http://
+    # but Twilio signed against the public https:// URL. Try both.
+    if validator.validate(url, params, signature):
+        return True
+    if url.startswith("http://"):
+        https_url = "https://" + url[len("http://"):]
+        return validator.validate(https_url, params, signature)
+    return False
 
 
 async def send_whatsapp_message(
