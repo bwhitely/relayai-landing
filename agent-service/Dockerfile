@@ -1,8 +1,5 @@
 FROM python:3.12-slim
 
-# Run as non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-
 WORKDIR /srv
 
 # Install dependencies first (layer caching)
@@ -12,11 +9,8 @@ RUN pip install --no-cache-dir .
 # Copy source code
 COPY . .
 
-# Install the app package itself
-RUN pip install --no-cache-dir -e .
-
-# Switch to non-root user
-USER appuser
+# Install the app package
+RUN pip install --no-cache-dir .
 
 EXPOSE 8000
 
