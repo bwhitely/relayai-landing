@@ -366,67 +366,85 @@ Xero uses OAuth2, which is more involved than API key auth. You'll need to regis
 
 > **Scopes:** The current integration uses `accounting.transactions.read` (search/view invoices). If you later need to create invoices, add `accounting.transactions` to the OAuth scope.
 
-### 11. Set Up WhatsApp (if applicable)
+### 11. Set Up WhatsApp + SMS via Twilio (if applicable)
 
-1. Client needs a Twilio account (or use your master account)
-2. For testing: use Twilio WhatsApp sandbox
-3. For production: apply for a Twilio WhatsApp Business number
-4. Set `twilio_phone_number`, `twilio_account_sid`, `twilio_auth_token` on the tenant
-5. Configure Twilio webhook URL to: `https://yourdomain.com/webhooks/twilio/whatsapp`
+WhatsApp and SMS both run through Twilio. A single phone number can handle both channels — Twilio routes to different webhook URLs based on the message type.
 
-### 12. Set Up SMS (if applicable)
+**Account ownership:** You (the platform operator) own a single Twilio account. You buy a phone number per client within your account. All webhook traffic goes to your API, and the system routes messages to the correct tenant by matching `twilio_phone_number`.
 
-SMS uses the same Twilio infrastructure as WhatsApp. A single phone number can handle both WhatsApp and SMS — Twilio routes to different webhook URLs based on the channel.
+Optionally, a client can use their own Twilio account — set `twilio_account_sid` + `twilio_auth_token` on the tenant and replies will be sent via their account. But for most clients, your shared account is simpler and cheaper.
 
-1. Buy a Twilio phone number with SMS capability (or use the same number as WhatsApp)
-2. Set `twilio_phone_number` on the tenant to the E.164 number (e.g. `+61412345678`)
-3. Set `twilio_account_sid` and `twilio_auth_token` on the tenant (or use fallback from `.env`)
-4. In the Twilio console for that phone number:
-   - Under **Messaging > A MESSAGE COMES IN**, set the webhook to: `https://yourdomain.com/webhooks/twilio/sms`
-   - Method: HTTP POST
-5. If the same number is also used for WhatsApp, configure the WhatsApp webhook separately in the Twilio WhatsApp sandbox/sender settings
+**Per-client setup:**
 
-> **Same number, both channels:** Twilio keeps WhatsApp and SMS webhooks separate. You can point WhatsApp to `/webhooks/twilio/whatsapp` and SMS to `/webhooks/twilio/sms` on the same phone number. Conversations are tracked separately per channel.
+1. **Buy a phone number** in the [Twilio Console](https://console.twilio.com) → Phone Numbers → Buy a Number
+   - For Australian clients, buy an AU mobile number (starts with `+614`)
+   - The number needs SMS capability at minimum; WhatsApp capability requires a separate approval step
+2. **Set up SMS webhook** on the number:
+   - Go to **Phone Numbers → Manage → Active Numbers** → click the number
+   - Under **Messaging → A MESSAGE COMES IN**, set:
+     - Webhook URL: `https://yourdomain.com/webhooks/twilio/sms`
+     - Method: HTTP POST
+3. **Set up WhatsApp** (if the client wants it):
+   - **For testing:** Use Twilio's WhatsApp Sandbox (Messaging → Try it out → Send a WhatsApp message). Configure the sandbox webhook to `https://yourdomain.com/webhooks/twilio/whatsapp`
+   - **For production:** Go to **Messaging → Senders → WhatsApp Senders** and request approval for the number. Once approved, set the webhook URL to `https://yourdomain.com/webhooks/twilio/whatsapp`
+   - WhatsApp Business approval takes a few days — start this early
+4. **Update the tenant record:**
+   ```bash
+   curl -X PUT https://yourdomain.com/admin/tenants/TENANT_ID \
+     -H "X-API-Key: YOUR_ADMIN_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "twilio_phone_number": "+61412345678"
+     }'
+   ```
+   - Only set `twilio_account_sid` + `twilio_auth_token` if the client uses their own Twilio account
+   - If not set, the system falls back to the shared `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` from your `.env`
 
-### 13. Set Up Facebook Messenger / Instagram DMs (if applicable)
+> **Same number, both channels:** Twilio keeps WhatsApp and SMS webhooks completely separate. You point WhatsApp to `/webhooks/twilio/whatsapp` and SMS to `/webhooks/twilio/sms` on the same number. Conversations are tracked separately per channel.
 
-Both Facebook Messenger and Instagram DMs are handled through Meta's Graph API via a single webhook endpoint. One Meta App can handle both channels for a client.
+> **Cost:** Twilio charges ~$1/month per number + per-message fees. WhatsApp messages are cheaper than SMS in most countries. You can pass this through to clients or absorb it in your pricing.
 
-**One-time setup (your Meta developer account):**
-1. Go to https://developers.facebook.com — create a developer account if you don't have one
-2. Create a new App: **Create App > Business > Business Type: Other**
-3. Add the **Messenger** product to the app
-4. If the client also wants Instagram DMs, add the **Instagram** product
+### 12. Set Up Facebook Messenger / Instagram DMs (if applicable)
+
+Both Facebook Messenger and Instagram DMs are handled through Meta's Graph API via a single webhook endpoint.
+
+**Account ownership:** You register one Meta App on your developer account. Each client connects their own Facebook Page to your app — the page belongs to them, you just process messages on their behalf. One Meta App handles all clients; each client's page gets its own access token, and inbound messages include the page ID so the system routes to the correct tenant.
+
+**One-time setup (do this once, not per client):**
+
+1. Go to [developers.facebook.com](https://developers.facebook.com) — create a developer account if needed
+2. **Create a new App:** Create App → Business → Other
+3. Add the **Messenger** product (and **Instagram** if any clients want IG DMs)
+4. Go to **App Settings → Basic** and copy the **App Secret** — this is the same for all tenants using this app
 
 **Per-client setup:**
 
 1. **Connect the client's Facebook Page:**
-   - In your Meta App settings, go to **Messenger > Settings**
-   - Under "Access Tokens", click **Add or Remove Pages**
-   - The client logs in and selects their Facebook Business Page
-   - Click **Generate Token** for their page — this is the `page_access_token`
-   - Note the **Page ID** (shown next to the page name) — this is the `meta_page_id`
+   - In your Meta App settings, go to **Messenger → Settings → Access Tokens**
+   - Click **Add or Remove Pages**
+   - The client logs into their Facebook account and selects their Business Page
+   - Click **Generate Token** for their page:
+     - Copy the **Page Access Token** → this is `page_access_token`
+     - Note the **Page ID** (shown next to the page name) → this is `meta_page_id`
 
-2. **Configure the webhook:**
-   - In **Messenger > Settings > Webhooks**, click **Add Callback URL**
+2. **Configure the webhook** (only needed once per Meta App — not per client):
+   - In **Messenger → Settings → Webhooks**, click **Add Callback URL**
    - Callback URL: `https://yourdomain.com/webhooks/meta`
-   - Verify Token: choose any string (e.g. `relay-verify-abc123`) — this is the `verify_token`
-   - Click **Verify and Save** (the platform will send a GET request to your endpoint)
-   - Subscribe to the `messages` webhook field
+   - Verify Token: choose any string (e.g. `relay-verify-abc123`) → this is `verify_token`
+   - Click **Verify and Save** — Meta sends a GET request to confirm your endpoint
+   - Subscribe to the **messages** webhook field
+   - If you've already done this for a previous client, you don't need to do it again — the same webhook URL handles all pages
 
 3. **For Instagram DMs (optional):**
-   - In the Meta App, go to **Instagram > Settings**
-   - Connect the client's Instagram Professional/Business account (must be linked to their Facebook Page)
+   - The client's Instagram account must be a Professional or Business account (not personal)
+   - It must be linked to the same Facebook Page connected in step 1
+   - In the Meta App, go to **Instagram → Settings** and connect the account
    - Subscribe to the `messages` webhook field for Instagram
-   - Instagram DMs use the same webhook URL and same Page Access Token
+   - Instagram DMs use the same webhook URL, same Page Access Token, and same `meta_page_id`
 
-4. **Get the App Secret:**
-   - Go to **App Settings > Basic**
-   - Copy the **App Secret** — this is used to validate webhook signatures
-
-5. **Update the tenant:**
+4. **Update the tenant:**
    ```bash
-   curl -X PUT http://localhost:8000/admin/tenants/TENANT_ID \
+   curl -X PUT https://yourdomain.com/admin/tenants/TENANT_ID \
      -H "X-API-Key: YOUR_ADMIN_KEY" \
      -H "Content-Type: application/json" \
      -d '{
@@ -435,13 +453,20 @@ Both Facebook Messenger and Instagram DMs are handled through Meta's Graph API v
      }'
    ```
 
-> **How it works:** Meta sends both Messenger and Instagram webhooks to the same URL. The system automatically detects which channel the message came from and tracks conversations separately as `facebook` or `instagram` channel types.
+> **Token expiry:** Short-lived Page Access Tokens expire after ~1 hour — don't use these. Always generate a **long-lived token** (valid ~60 days) or better, use a **System User token** (never expires). To extend a short-lived token:
+> ```bash
+> curl "https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=APP_ID&client_secret=APP_SECRET&fb_exchange_token=SHORT_LIVED_TOKEN"
+> ```
+
+> **How it works:** Meta sends both Messenger and Instagram webhooks to the same URL. The system detects which channel from the payload and tracks conversations separately as `facebook` or `instagram`.
 
 > **Background processing:** Unlike WhatsApp/SMS (which are synchronous), Meta requires a response within 5 seconds. The endpoint returns `200` immediately and processes the message + sends the reply in a background task. If the agent loop fails, a fallback message is sent.
 
 > **Message limits:** Meta has a 2000-character message limit. Long agent replies are automatically split into multiple messages.
 
-### 14. Deploy Chat Widget (if applicable)
+> **Cost:** Meta's messaging API is free. You only pay for the Anthropic API usage (same as any other channel).
+
+### 13. Deploy Chat Widget (if applicable)
 
 See [Widget Integration Guide](widget-integration.md) for full details.
 

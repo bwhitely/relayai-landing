@@ -548,6 +548,14 @@
         </div>
 
         <div class="snippet-section">
+          <h4>Tenant ID</h4>
+          <div class="copy-field">
+            <input type="text" value="${escapeHtml(tenant.id || '')}" readonly>
+            <button class="btn btn-secondary btn-sm" id="copy-id">Copy</button>
+          </div>
+        </div>
+
+        <div class="snippet-section">
           <h4>API Key</h4>
           <div class="copy-field">
             <input type="text" value="${escapeHtml(tenant.api_key || '')}" readonly>
@@ -577,6 +585,9 @@
       `;
 
       // Copy buttons
+      document.getElementById('copy-id').addEventListener('click', () => {
+        copyToClipboard(tenant.id || '');
+      });
       document.getElementById('copy-key').addEventListener('click', () => {
         copyToClipboard(tenant.api_key || '');
       });

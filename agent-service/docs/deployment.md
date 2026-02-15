@@ -206,19 +206,70 @@ curl -X POST $API_URL/webhooks/generic/TENANT_ID \
 
 ## Step 8: Configure external webhooks
 
+This is where you connect external messaging platforms to your API so inbound messages reach the agent. Each platform has a different account/ownership model — read carefully.
+
 ### Twilio (WhatsApp + SMS)
 
-1. In the [Twilio Console](https://console.twilio.com), go to your phone number settings
-2. Set the webhook URLs:
-   - **WhatsApp**: `https://api.relayai.com.au/webhooks/twilio/whatsapp` (POST)
-   - **SMS**: `https://api.relayai.com.au/webhooks/twilio/sms` (POST)
+**Account model:** You own one Twilio account. You buy a phone number per client within that account. All webhook traffic goes to your single API.
 
-### Meta (Facebook Messenger + Instagram)
+Optionally, a client can use their own Twilio account — set `twilio_account_sid` + `twilio_auth_token` on the tenant and it overrides the shared `.env` credentials for sending replies. But for most clients, your shared account is simpler.
 
-1. In your [Meta App dashboard](https://developers.facebook.com), go to Messenger → Settings → Webhooks
-2. Set callback URL: `https://api.relayai.com.au/webhooks/meta`
-3. Set verify token: whatever you put in the tenant's `meta_credentials.verify_token`
-4. Subscribe to the `messages` webhook field
+**Setup per phone number:**
+
+1. In the [Twilio Console](https://console.twilio.com), go to **Phone Numbers → Manage → Active Numbers**
+2. Select (or buy) the number for this client
+3. Under **Messaging > A MESSAGE COMES IN**:
+   - Webhook URL: `https://api.relayai.com.au/webhooks/twilio/sms`
+   - Method: HTTP POST
+4. For **WhatsApp** on the same number, go to **Messaging → Try it out → Send a WhatsApp message** (sandbox) or **Senders → WhatsApp Senders** (production):
+   - Webhook URL: `https://api.relayai.com.au/webhooks/twilio/whatsapp`
+   - Method: HTTP POST
+5. On the tenant record, set `twilio_phone_number` to the E.164 number (e.g. `+61412345678`) — this is how inbound messages are routed to the correct tenant
+
+> **Same number, both channels:** Twilio keeps WhatsApp and SMS webhooks separate. One number can handle both — they route to different webhook URLs. Conversations are tracked separately per channel.
+
+> **WhatsApp Business approval:** Twilio sandbox numbers work for testing. For production, you need an approved WhatsApp Business number through Twilio — this takes a few days.
+
+### Meta (Facebook Messenger + Instagram DMs)
+
+**Account model:** You register one Meta App (on your developer account). Each client connects their Facebook Page to your app and generates a Page Access Token. The client's page is theirs — you just process messages on their behalf.
+
+Both Messenger and Instagram DMs use the same webhook endpoint. Meta differentiates them via the `object` field in the payload.
+
+**One-time setup (do this once):**
+
+1. Go to [developers.facebook.com](https://developers.facebook.com) — create a developer account if needed
+2. **Create a new App:** Create App → Business → Other
+3. Add the **Messenger** product (and **Instagram** if clients want IG DMs)
+4. Go to **App Settings → Basic** and copy the **App Secret** — you'll need this for every tenant
+
+**Per-client setup:**
+
+1. In your Meta App, go to **Messenger → Settings → Access Tokens**
+2. Click **Add or Remove Pages** — the client logs into Facebook and selects their Business Page
+3. Click **Generate Token** for their page:
+   - Copy the **Page Access Token** → this is `page_access_token`
+   - Note the **Page ID** (shown next to the page name) → this is `meta_page_id`
+4. Go to **Messenger → Settings → Webhooks** and click **Add Callback URL**:
+   - Callback URL: `https://api.relayai.com.au/webhooks/meta`
+   - Verify Token: choose any string (e.g. `relay-verify-abc123`) → this is `verify_token`
+   - Click **Verify and Save** — Meta sends a GET request to confirm
+   - Subscribe to the **messages** webhook field
+5. For Instagram (optional): go to **Instagram → Settings**, connect the client's Instagram Professional account (must be linked to their Facebook Page), and subscribe to `messages`
+6. Update the tenant:
+   ```bash
+   curl -X PUT https://api.relayai.com.au/admin/tenants/TENANT_ID \
+     -H "X-API-Key: YOUR_ADMIN_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "meta_page_id": "123456789012345",
+       "meta_credentials": "{\"app_secret\": \"your-app-secret\", \"page_access_token\": \"EAAxxxxxxx...\", \"verify_token\": \"relay-verify-abc123\"}"
+     }'
+   ```
+
+> **Why one Meta App?** A single Meta App can handle multiple client pages. Each page gets its own access token. The webhook URL is shared — inbound messages include the page ID, which we use to look up the tenant. You don't need a separate Meta App per client.
+
+> **Token expiry:** Short-lived Page Access Tokens expire after ~1 hour. Always generate a **long-lived token** (valid ~60 days) or use a **System User token** (never expires). See [Meta docs on long-lived tokens](https://developers.facebook.com/docs/pages/access-tokens).
 
 ### Landing page demo widget
 
