@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from app.models.tenant import Tenant
 
 DEFAULT_SYSTEM_PROMPT = """\
@@ -11,6 +13,8 @@ Keep responses concise and friendly. Do not make up information you don't have.\
 
 
 def build_system_prompt(tenant: Tenant) -> str:
-    if tenant.system_prompt:
-        return tenant.system_prompt
-    return DEFAULT_SYSTEM_PROMPT.format(business_name=tenant.name)
+    now = datetime.now(timezone.utc)
+    date_line = f"Today's date is {now.strftime('%A, %d %B %Y')} (UTC). Current time: {now.strftime('%H:%M')} UTC."
+
+    base = tenant.system_prompt or DEFAULT_SYSTEM_PROMPT.format(business_name=tenant.name)
+    return f"{date_line}\n\n{base}"
