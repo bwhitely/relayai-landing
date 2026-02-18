@@ -1892,9 +1892,9 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
 
-        gtag_report_conversion();
+        gtagSendEvent();
 
-        fetch('https://formsubmit.co/ajax/bwhitely@live.com', {
+        fetch('https://formsubmit.co/ajax/ben@relayai.com.au', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify(data)
