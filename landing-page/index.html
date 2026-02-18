@@ -30,6 +30,21 @@
 
     gtag('config', 'G-5H4GZ7LE61');
   </script>
+  <script>
+    function gtagSendEvent(url) {
+      var callback = function () {
+        if (typeof url === 'string') {
+          window.location = url;
+        }
+      };
+
+      gtag('event', 'conversion_event_submit_lead_form', {
+        'event_callback': callback,
+        'event_timeout': 2000,
+      });
+      return false;
+    }
+  </script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -1617,7 +1632,7 @@
             <div class="step-number">3</div>
             <div>
               <h3>It works for you 24/7</h3>
-              <p>Your agent runs in the background, handling tasks around the clock. It escalates when a human touch is needed. You stay in control.</p>
+              <p>Your automation workflows run in the background, handling tasks around the clock. Escalation when a human touch is needed. You stay in control.</p>
             </div>
           </div>
         </div>
@@ -1875,6 +1890,8 @@
         var submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
+
+        gtag_report_conversion();
 
         fetch('https://formsubmit.co/ajax/bwhitely@live.com', {
           method: 'POST',
@@ -2272,6 +2289,5 @@
       });
     })();
   </script>
-
 </body>
 </html>
