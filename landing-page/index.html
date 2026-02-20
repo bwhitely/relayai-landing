@@ -429,6 +429,35 @@
       flex-wrap: wrap;
     }
 
+    .hero-scroll {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      animation: heroFade 2s ease-in-out infinite;
+    }
+
+    .hero-scroll svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-muted);
+    }
+
+    @keyframes heroFade {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+
     /* ---- HERO ACCENT ---- */
     .hero-accent {
       position: absolute;
@@ -1536,6 +1565,10 @@
           <a href="#demo" class="btn btn-ghost">Try the Live Demo</a>
         </div>
       </div>
+      <div class="hero-scroll">
+        <span>Scroll</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+      </div>
     </section>
 
     <!-- INTEGRATION LOGO STRIP -->
@@ -2078,6 +2111,7 @@
         submitBtn.textContent = 'Sending...';
 
         if (typeof gtagSendEvent === 'function') gtagSendEvent();
+        gtagTrack('form_submit', { form_name: 'contact', business_type: businessType });
 
         // HubSpot Forms API — create contact in CRM
         var hubspotData = {
@@ -2401,8 +2435,12 @@
         }
       }
 
+      var demoMessageCount = 0;
       window.sendDemoMessage = function (text) {
         if (demoSending || !text.trim()) return;
+        demoMessageCount++;
+        gtagTrack('demo_message_sent', { message_number: demoMessageCount, message_preview: text.substring(0, 50) });
+        if (demoMessageCount === 1) gtagTrack('demo_started');
 
         renderChatMessage('user', text);
         setDemoSending(true);
@@ -2516,6 +2554,46 @@
           }
         }
       });
+    })();
+
+    // ---- GA EVENT TRACKING ----
+    (function () {
+      // CTA click tracking
+      document.querySelectorAll('.hero-ctas a, .nav-cta').forEach(function (el) {
+        el.addEventListener('click', function () {
+          gtagTrack('cta_click', { cta_text: el.textContent.trim(), cta_url: el.getAttribute('href') });
+        });
+      });
+
+      // Scroll depth tracking (25%, 50%, 75%, 100%)
+      var scrollThresholds = [25, 50, 75, 100];
+      var scrollFired = {};
+      window.addEventListener('scroll', function () {
+        var scrollPct = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+        scrollThresholds.forEach(function (t) {
+          if (scrollPct >= t && !scrollFired[t]) {
+            scrollFired[t] = true;
+            gtagTrack('scroll_depth', { percent: t });
+          }
+        });
+      }, { passive: true });
+
+      // Section visibility tracking
+      if ('IntersectionObserver' in window) {
+        var sectionsFired = {};
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting && !sectionsFired[entry.target.id]) {
+              sectionsFired[entry.target.id] = true;
+              gtagTrack('section_view', { section: entry.target.id });
+            }
+          });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('section[id]').forEach(function (s) {
+          observer.observe(s);
+        });
+      }
     })();
   </script>
 </body>
