@@ -37,22 +37,21 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-5H4GZ7LE61');
   </script>
   <script>
-    function gtagSendEvent(url) {
-      var callback = function () {
-        if (typeof url === 'string') {
-          window.location = url;
-        }
-      };
-
-      gtag('event', 'conversion_event_submit_lead_form', {
-        'event_callback': callback,
-        'event_timeout': 2000,
-      });
-      return false;
+    function gtagLeadEvent(callback) {
+      try {
+        gtag('event', 'generate_lead', { event_callback: callback, event_timeout: 2000 });
+        gtag('event', 'conversion_event_submit_lead_form', { event_callback: callback, event_timeout: 2000 });
+      } catch (e) {
+        if (typeof callback === 'function') callback();
+      }
+    }
+    function gtagTrack(eventName, params) {
+      try {
+        gtag('event', eventName, params || {});
+      } catch (e) {}
     }
   </script>
   <script type="application/ld+json">
@@ -412,6 +411,22 @@
 
     .btn:active {
       transform: translateY(0);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     /* ---- HERO ACCENT ---- */
@@ -1516,7 +1531,10 @@
       <div class="container hero-content">
         <h1>Your Business, Running While You Sleep.</h1>
         <p>We build custom workflow automations, system integrations, document processing, and AI agents for Australian small & medium businesses — so repetitive work handles itself, your tools talk to each other, and you can focus on what actually grows your business.</p>
-        <a href="#contact" class="btn">Book a Free Consultation</a>
+        <div class="hero-ctas">
+          <a href="#contact" class="btn">Book a Free Consultation</a>
+          <a href="#demo" class="btn btn-ghost">Try the Live Demo</a>
+        </div>
       </div>
     </section>
 
@@ -2059,14 +2077,39 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
 
-        gtagSendEvent();
+        if (typeof gtagSendEvent === 'function') gtagSendEvent();
 
-        fetch('https://formsubmit.co/ajax/ben@relayai.com.au', {
+        // HubSpot Forms API — create contact in CRM
+        var hubspotData = {
+          fields: [
+            { name: 'firstname', value: name },
+            { name: 'email', value: email },
+            { name: 'business_type', value: businessType },
+            { name: 'message', value: message }
+          ],
+          context: {
+            pageUri: window.location.href,
+            pageName: document.title
+          }
+        };
+
+        // Fire both requests in parallel — FormSubmit for email notification, HubSpot for CRM
+        var formSubmitReq = fetch('https://formsubmit.co/ajax/ben@relayai.com.au', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify(data)
-        })
-        .then(function (res) { return res.json(); })
+        }).then(function (res) { return res.json(); });
+
+        var hubspotReq = fetch('https://api.hsforms.com/submissions/v3/integration/submit/442811767/239a9b1c-a22d-4435-9b0e-cecd956b86bb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(hubspotData)
+        }).then(function (res) { return res.json(); });
+
+        // Wait for FormSubmit (primary) — HubSpot is fire-and-forget
+        hubspotReq.catch(function () {}); // silently ignore HubSpot errors
+
+        formSubmitReq
         .then(function (result) {
           if (result.success) {
             form.style.display = 'none';
