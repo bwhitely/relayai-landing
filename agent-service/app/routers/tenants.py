@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import require_admin
-from app.models import Conversation, Tenant, UsageLog
+from app.models import Conversation, Tenant, UsageLog, WebhookError
 from app.schemas.tenant import (
     ConversationSummary,
     TenantCreate,
@@ -165,4 +165,33 @@ async def list_tenant_conversations(
             last_message_at=c.last_message_at,
         )
         for c in conversations
+    ]
+
+
+@router.get("/{tenant_id}/webhook-errors")
+async def list_webhook_errors(
+    tenant_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    tenant = await db.get(Tenant, tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+
+    result = await db.execute(
+        select(WebhookError)
+        .where(WebhookError.tenant_id == tenant_id)
+        .order_by(WebhookError.created_at.desc())
+        .limit(100)
+    )
+    errors = result.scalars().all()
+    return [
+        {
+            "id": str(e.id),
+            "channel": e.channel,
+            "error_type": e.error_type,
+            "error_message": e.error_message,
+            "sender_id": e.sender_id,
+            "created_at": e.created_at.isoformat(),
+        }
+        for e in errors
     ]

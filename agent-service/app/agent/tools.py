@@ -1,3 +1,4 @@
+import base64
 import html
 import json
 import logging
@@ -939,4 +940,195 @@ register_tool(
         "required": ["invoice_id"],
     },
     handler=_check_payment_status_handler,
+)
+
+
+async def _call_http_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """Call a pre-configured HTTP endpoint from the tenant's tools_config."""
+    import httpx
+
+    endpoint_name = tool_input.get("endpoint_name", "").strip()
+    if not endpoint_name:
+        return {"error": "endpoint_name is required"}
+
+    # Load configured endpoints — admin pre-configures these, no arbitrary URLs allowed
+    configured = {}
+    if tenant.tools_config:
+        for ep in tenant.tools_config.get("http_endpoints", []):
+            if isinstance(ep, dict) and "name" in ep and "url" in ep:
+                configured[ep["name"]] = ep
+
+    endpoint = configured.get(endpoint_name)
+    if not endpoint:
+        available = list(configured.keys())
+        return {"error": f"Unknown endpoint '{endpoint_name}'. Available: {available}"}
+
+    url = endpoint["url"]
+    method = endpoint.get("method", "GET").upper()
+    headers = dict(endpoint.get("headers", {}))
+
+    # Substitute path parameters
+    for key, value in (tool_input.get("path_params") or {}).items():
+        url = url.replace(f"{{{key}}}", str(value))
+
+    query_params = tool_input.get("query_params") or {}
+    body = tool_input.get("body") or None
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+            response = await client.request(
+                method=method,
+                url=url,
+                headers=headers,
+                params=query_params if query_params else None,
+                json=body,
+            )
+            response.raise_for_status()
+        try:
+            return {"status": response.status_code, "data": response.json()}
+        except Exception:
+            return {"status": response.status_code, "data": response.text[:5000]}
+    except httpx.HTTPStatusError as e:
+        return {"error": f"HTTP {e.response.status_code}: {e.response.text[:500]}"}
+    except httpx.RequestError as e:
+        return {"error": f"Request failed: {e}"}
+
+
+async def _process_document_handler(tool_input: dict, tenant: Tenant) -> dict:
+    """Download a document and use Claude to extract information from it."""
+    import httpx
+
+    document_url = tool_input.get("document_url", "").strip()
+    extraction_instructions = tool_input.get("extraction_instructions", "Extract all key information from this document.")
+
+    if not document_url:
+        return {"error": "document_url is required"}
+
+    # Download the document
+    try:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+            response = await client.get(document_url)
+            response.raise_for_status()
+    except httpx.HTTPError as e:
+        return {"error": f"Failed to download document: {e}"}
+
+    content_type = response.headers.get("content-type", "").split(";")[0].strip().lower()
+    raw_bytes = response.content
+
+    # Build the content block for Claude
+    if content_type == "application/pdf":
+        media_type = "application/pdf"
+        source_type = "base64"
+        data = base64.standard_b64encode(raw_bytes).decode("utf-8")
+        document_block = {
+            "type": "document",
+            "source": {"type": source_type, "media_type": media_type, "data": data},
+        }
+    elif content_type in ("image/jpeg", "image/png", "image/gif", "image/webp"):
+        data = base64.standard_b64encode(raw_bytes).decode("utf-8")
+        document_block = {
+            "type": "image",
+            "source": {"type": "base64", "media_type": content_type, "data": data},
+        }
+    else:
+        # Treat as plain text
+        try:
+            text = raw_bytes.decode("utf-8", errors="replace")
+        except Exception:
+            return {"error": f"Unsupported document type: {content_type}"}
+        document_block = {"type": "text", "text": text[:20000]}
+
+    from app.integrations.anthropic import get_client, get_settings
+    settings = get_settings()
+
+    llm_response = await get_client().messages.create(
+        model=settings.default_model,
+        max_tokens=2048,
+        system="You are a document extraction assistant. Extract the requested information accurately and return it as structured JSON.",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    document_block,
+                    {"type": "text", "text": extraction_instructions + "\n\nReturn your response as JSON."},
+                ],
+            }
+        ],
+    )
+
+    extracted_text = ""
+    for block in llm_response.content:
+        if hasattr(block, "text"):
+            extracted_text = block.text
+            break
+        elif isinstance(block, dict) and block.get("type") == "text":
+            extracted_text = block.get("text", "")
+            break
+
+    try:
+        return {"extracted_data": json.loads(extracted_text)}
+    except (json.JSONDecodeError, ValueError):
+        return {"extracted_data": extracted_text}
+
+
+register_tool(
+    name="call_http",
+    description=(
+        "Call a pre-configured external API endpoint. Use this to fetch or submit data "
+        "to external systems set up for your business. "
+        "Only pre-configured endpoints are available — ask your administrator which names to use."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "endpoint_name": {
+                "type": "string",
+                "description": "Name of the pre-configured endpoint to call",
+            },
+            "path_params": {
+                "type": "object",
+                "description": "URL path parameters. E.g. {\"id\": \"123\"} replaces {id} in the URL.",
+                "additionalProperties": {"type": "string"},
+            },
+            "query_params": {
+                "type": "object",
+                "description": "Query string parameters to append to the URL.",
+                "additionalProperties": {"type": "string"},
+            },
+            "body": {
+                "type": "object",
+                "description": "Request body for POST/PUT/PATCH requests (sent as JSON).",
+            },
+        },
+        "required": ["endpoint_name"],
+    },
+    handler=_call_http_handler,
+)
+
+
+register_tool(
+    name="process_document",
+    description=(
+        "Download and process a document (PDF, image, or text file) to extract information from it. "
+        "Use this when a customer shares a document URL and you need to read its contents — "
+        "such as an invoice, referral letter, intake form, quote, or contract."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "document_url": {
+                "type": "string",
+                "description": "The URL of the document to process (PDF, image, or text file)",
+            },
+            "extraction_instructions": {
+                "type": "string",
+                "description": (
+                    "What information to extract from the document. "
+                    "Be specific, e.g. 'Extract the invoice number, date, total amount, and line items'"
+                ),
+            },
+        },
+        "required": ["document_url", "extraction_instructions"],
+    },
+    handler=_process_document_handler,
 )

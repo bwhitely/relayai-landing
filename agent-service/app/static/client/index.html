@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RelayAI — Agent Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #111113;
+      --bg-elevated: #1a1a1e;
+      --bg-card: #1e1e22;
+      --text: #e8e6e3;
+      --text-muted: #9a9898;
+      --accent: #d4952a;
+      --accent-hover: #e5a83a;
+      --accent-glow: rgba(212, 149, 42, 0.2);
+      --border: #2a2a2e;
+      --font-display: 'Clash Display', sans-serif;
+      --font-body: 'Switzer', sans-serif;
+      --success: #2ea043;
+      --danger: #da3633;
+      --warning: #e3a329;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.125rem;
+      color: var(--accent);
+    }
+
+    .header-tenant {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .header-tenant strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      flex-shrink: 0;
+    }
+
+    .btn-signout {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-family: var(--font-body);
+      padding: 0.375rem 0.625rem;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+
+    .btn-signout:hover { color: var(--text); }
+
+    /* ─── Login ──────────────────────────────────── */
+    .login-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-brand {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .login-subtitle {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.375rem;
+    }
+
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-family: var(--font-body);
+      transition: border-color 0.15s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .form-group { margin-bottom: 1.25rem; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.625rem 1.25rem;
+      background: var(--accent);
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .alert-error {
+      background: rgba(218, 54, 51, 0.12);
+      border: 1px solid rgba(218, 54, 51, 0.3);
+      color: #f88;
+      border-radius: 6px;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.8125rem;
+      margin-bottom: 1rem;
+    }
+
+    .alert-error:empty { display: none; }
+
+    /* ─── Main container ─────────────────────────── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* ─── Stat cards ─────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 800px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      .stat-grid { grid-template-columns: 1fr; }
+      .container { padding: 1rem; }
+      .header { padding: 0.75rem 1rem; }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.375rem;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 0.375rem;
+    }
+
+    .stat-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .stat-up { color: var(--success); }
+    .stat-down { color: var(--danger); }
+    .stat-neutral { color: var(--text-muted); }
+
+    /* ─── Chart ──────────────────────────────────── */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .chart-wrap {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .chart-wrap svg { display: block; }
+
+    /* ─── Two-column section ─────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Channel bars ───────────────────────────── */
+    .channel-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .channel-row:last-child { margin-bottom: 0; }
+
+    .channel-name {
+      font-size: 0.8125rem;
+      width: 90px;
+      flex-shrink: 0;
+      color: var(--text);
+      text-transform: capitalize;
+    }
+
+    .channel-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .channel-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .channel-pct {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ─── Usage progress ─────────────────────────── */
+    .usage-numbers {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+    }
+
+    .usage-used {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .usage-limit {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .usage-bar-wrap {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .usage-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .usage-bar-ok { background: var(--accent); }
+    .usage-bar-warn { background: var(--warning); }
+    .usage-bar-danger { background: var(--danger); }
+
+    .usage-caption {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ─── Table ──────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 0.625rem 1rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    /* ─── Badges ─────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-active    { background: rgba(46,160,67,0.18); color: #7ee787; }
+    .badge-escalated { background: rgba(212,149,42,0.18); color: var(--accent-hover); }
+    .badge-closed    { background: rgba(154,152,152,0.18); color: var(--text-muted); }
+    .badge-channel   { background: rgba(56,139,253,0.12); color: #79c0ff; }
+
+    /* ─── Skeleton ───────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 0%, var(--bg-elevated) 50%, var(--bg-card) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-stat {
+      height: 20px;
+      margin-bottom: 0.5rem;
+    }
+
+    .skeleton-stat-val {
+      height: 40px;
+      width: 80px;
+    }
+
+    /* ─── Empty state ────────────────────────────── */
+    .empty-state {
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* ─── Page title row ─────────────────────────── */
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .page-title strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ─── Spinner ────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // ─── State ──────────────────────────────────────────────────────
+    let apiKey = sessionStorage.getItem('clientApiKey') || '';
+    let me = null, stats = null, convs = null;
+    let loading = false;
+
+    // ─── API ─────────────────────────────────────────────────────────
+    async function apiFetch(path) {
+      const res = await fetch(path, { headers: { 'X-API-Key': apiKey } });
+      if (res.status === 403) { logout(); return null; }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    function logout() {
+      sessionStorage.removeItem('clientApiKey');
+      apiKey = '';
+      me = null; stats = null; convs = null;
+      render();
+    }
+
+    async function loadDashboard() {
+      loading = true;
+      render();
+      try {
+        [me, stats, convs] = await Promise.all([
+          apiFetch('/client/me'),
+          apiFetch('/client/stats'),
+          apiFetch('/client/conversations'),
+        ]);
+      } catch (e) {
+        me = null;
+      }
+      loading = false;
+      render();
+    }
+
+    // ─── Formatters ──────────────────────────────────────────────────
+    function fmtRelative(isoStr) {
+      const ms = Date.now() - new Date(isoStr).getTime();
+      const min = Math.floor(ms / 60000);
+      const hr  = Math.floor(min / 60);
+      const day = Math.floor(hr / 24);
+      if (min < 1)  return 'just now';
+      if (min < 60) return min + 'm ago';
+      if (hr  < 24) return hr  + 'h ago';
+      if (day < 7)  return day + 'd ago';
+      return new Date(isoStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+    }
+
+    function momChange(cur, prev) {
+      if (prev === 0 && cur === 0) return '';
+      if (prev === 0) return '<span class="stat-up">↑ new</span>';
+      const pct = Math.round((cur - prev) / prev * 100);
+      if (pct > 0) return `<span class="stat-up">↑ ${pct}%</span> vs last month`;
+      if (pct < 0) return `<span class="stat-down">↓ ${Math.abs(pct)}%</span> vs last month`;
+      return '<span class="stat-neutral">= no change</span> vs last month';
+    }
+
+    function channelLabel(ch) {
+      return { whatsapp: 'WhatsApp', sms: 'SMS', web: 'Web', facebook: 'Messenger', instagram: 'Instagram' }[ch] || ch;
+    }
+
+    function statusBadge(s) {
+      return `<span class="badge badge-${s}">${s}</span>`;
+    }
+
+    // ─── SVG bar chart ───────────────────────────────────────────────
+    function buildChart(dailyVolume) {
+      const DAYS = 30;
+      const BAR_W = 10;
+      const GAP = 3;
+      const H = 120;
+      const W = DAYS * (BAR_W + GAP) - GAP;
+
+      // Build complete date range
+      const dateMap = {};
+      for (const d of dailyVolume) dateMap[d.date] = d.count;
+
+      const dates = [];
+      const now = new Date();
+      for (let i = DAYS - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().slice(0, 10));
+      }
+
+      const values = dates.map(d => dateMap[d] || 0);
+      const maxVal = Math.max(...values, 1);
+
+      let bars = '';
+      values.forEach((v, i) => {
+        const barH = v > 0 ? Math.max((v / maxVal) * H, 3) : 0;
+        const x = i * (BAR_W + GAP);
+        const y = H - barH;
+        const label = `${dates[i]}: ${v} conversation${v !== 1 ? 's' : ''}`;
+        bars += `<rect x="${x}" y="${y}" width="${BAR_W}" height="${barH}" rx="2"
+          fill="var(--accent)" opacity="${v > 0 ? '0.9' : '0.12'}">
+          <title>${label}</title></rect>`;
+        // Zero-height placeholder
+        if (v === 0) {
+          bars += `<rect x="${x}" y="${H - 2}" width="${BAR_W}" height="2" rx="1"
+            fill="var(--border)"><title>${label}</title></rect>`;
+        }
+      });
+
+      return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"
+        preserveAspectRatio="none" style="display:block">${bars}</svg>`;
+    }
+
+    // ─── Render helpers ──────────────────────────────────────────────
+    function skeletonStatCard(label) {
+      return `<div class="stat-card">
+        <div class="stat-label">${label}</div>
+        <div class="skeleton skeleton-stat-val" style="margin: 0.5rem 0 0.5rem"></div>
+        <div class="skeleton skeleton-stat" style="width:60%"></div>
+      </div>`;
+    }
+
+    // ─── Login ───────────────────────────────────────────────────────
+    function renderLogin(errMsg) {
+      return `<div class="login-wrap">
+        <div class="login-card">
+          <div class="login-brand">RelayAI</div>
+          <p class="login-subtitle">Agent Dashboard</p>
+          <div class="alert-error" id="login-err">${errMsg || ''}</div>
+          <div class="form-group">
+            <label for="key-input">API Key</label>
+            <input type="password" id="key-input" placeholder="Enter your API key…" autocomplete="current-password">
+          </div>
+          <button class="btn-primary" id="login-btn">Sign In</button>
+        </div>
+      </div>`;
+    }
+
+    // ─── Dashboard ───────────────────────────────────────────────────
+    function renderDashboard() {
+      // Header
+      const statusDot = (me && me.is_active)
+        ? '<span class="status-dot" title="Active"></span>'
+        : '<span class="status-dot" style="background:var(--danger)" title="Inactive"></span>';
+
+      const headerHtml = `<header class="header">
+        <div class="header-left">
+          <span class="brand">RelayAI</span>
+          <div class="header-tenant">
+            ${statusDot}
+            <strong>${me ? escHtml(me.name) : '…'}</strong>
+          </div>
+        </div>
+        <button class="btn-signout" id="signout-btn">Sign out</button>
+      </header>`;
+
+      // Loading skeletons
+      if (loading) {
+        return headerHtml + `<div class="container">
+          <div class="stat-grid">
+            ${skeletonStatCard('Conversations')}
+            ${skeletonStatCard('Self-Service Rate')}
+            ${skeletonStatCard('Escalations')}
+            ${skeletonStatCard('Top Channel')}
+          </div>
+          <div class="section-card" style="height:180px">
+            <div class="section-title">Activity — Last 30 Days</div>
+            <div class="skeleton" style="height:120px;border-radius:6px"></div>
+          </div>
+        </div>`;
+      }
+
+      if (!stats) {
+        return headerHtml + `<div class="container">
+          <div class="empty-state">Failed to load dashboard data. Please refresh.</div>
+        </div>`;
+      }
+
+      // ── Stat cards ────────────────────────────────
+      const topChan = stats.channel_breakdown[0];
+
+      const statCards = `<div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Conversations</div>
+          <div class="stat-value">${stats.conversations_this_month}</div>
+          <div class="stat-meta">${momChange(stats.conversations_this_month, stats.conversations_last_month)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Self-Service Rate</div>
+          <div class="stat-value">${stats.self_service_rate}%</div>
+          <div class="stat-meta">handled without escalation</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Escalations</div>
+          <div class="stat-value">${stats.escalation_count_this_month}</div>
+          <div class="stat-meta">this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Top Channel</div>
+          <div class="stat-value" style="font-size:1.5rem">${topChan ? channelLabel(topChan.channel) : '—'}</div>
+          <div class="stat-meta">${topChan ? topChan.percentage + '% of conversations' : 'no data yet'}</div>
+        </div>
+      </div>`;
+
+      // ── Activity chart ────────────────────────────
+      const chartHtml = `<div class="section-card">
+        <div class="section-title">Activity — Last 30 Days</div>
+        <div class="chart-wrap">${buildChart(stats.daily_volume)}</div>
+      </div>`;
+
+      // ── Channel breakdown ─────────────────────────
+      let chanRows = '';
+      if (stats.channel_breakdown.length === 0) {
+        chanRows = '<div class="empty-state" style="padding:1.5rem 0">No channel data yet</div>';
+      } else {
+        for (const c of stats.channel_breakdown) {
+          chanRows += `<div class="channel-row">
+            <span class="channel-name">${channelLabel(c.channel)}</span>
+            <div class="channel-bar-wrap">
+              <div class="channel-bar" style="width:${c.percentage}%"></div>
+            </div>
+            <span class="channel-pct">${c.percentage}%</span>
+          </div>`;
+        }
+      }
+
+      // ── Monthly usage ─────────────────────────────
+      const used  = stats.conversations_used;
+      const limit = stats.conversations_limit;
+      const pct   = limit > 0 ? Math.min(Math.round(used / limit * 100), 100) : 0;
+      const barClass = pct >= 90 ? 'usage-bar-danger' : pct >= 70 ? 'usage-bar-warn' : 'usage-bar-ok';
+      const resetMsg  = 'Resets on 1st of next month';
+
+      const usageHtml = `<div>
+        <div class="usage-numbers">
+          <span class="usage-used">${used}</span>
+          <span class="usage-limit">/ ${limit} conversations</span>
+        </div>
+        <div class="usage-bar-wrap">
+          <div class="usage-bar ${barClass}" style="width:${pct}%"></div>
+        </div>
+        <div class="usage-caption">${pct}% used &mdash; ${resetMsg}</div>
+      </div>`;
+
+      const twoCol = `<div class="two-col">
+        <div class="section-card">
+          <div class="section-title">Channel Breakdown</div>
+          ${chanRows}
+        </div>
+        <div class="section-card">
+          <div class="section-title">Monthly Usage</div>
+          ${usageHtml}
+        </div>
+      </div>`;
+
+      // ── Recent conversations ───────────────────────
+      let tableRows = '';
+      if (!convs || convs.length === 0) {
+        tableRows = `<tr><td colspan="5"><div class="empty-state">No conversations yet</div></td></tr>`;
+      } else {
+        for (const c of convs) {
+          tableRows += `<tr>
+            <td><span class="badge badge-channel">${channelLabel(c.channel)}</span></td>
+            <td style="color:var(--text-muted)">${escHtml(c.identifier)}</td>
+            <td>${c.message_count}</td>
+            <td>${statusBadge(c.status)}</td>
+            <td style="color:var(--text-muted)">${fmtRelative(c.last_activity)}</td>
+          </tr>`;
+        }
+      }
+
+      const convTable = `<div class="section-card" style="padding:0">
+        <div style="padding:1.25rem 1.25rem 0.75rem">
+          <div class="section-title" style="margin:0">Recent Conversations</div>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0 0 8px 8px">
+          <table>
+            <thead><tr>
+              <th>Channel</th>
+              <th>Sender</th>
+              <th>Messages</th>
+              <th>Status</th>
+              <th>Last Active</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      </div>`;
+
+      return headerHtml + `<div class="container">
+        ${statCards}
+        ${chartHtml}
+        ${twoCol}
+        ${convTable}
+      </div>`;
+    }
+
+    // ─── Escape HTML ─────────────────────────────────────────────────
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ─── Render ───────────────────────────────────────────────────────
+    function render() {
+      document.getElementById('app').innerHTML = apiKey
+        ? renderDashboard()
+        : renderLogin();
+      attachEvents();
+    }
+
+    function attachEvents() {
+      // Sign out
+      const signoutBtn = document.getElementById('signout-btn');
+      if (signoutBtn) signoutBtn.addEventListener('click', logout);
+
+      // Login form
+      const loginBtn  = document.getElementById('login-btn');
+      const keyInput  = document.getElementById('key-input');
+      if (loginBtn && keyInput) {
+        async function doLogin() {
+          const key = keyInput.value.trim();
+          if (!key) return;
+          loginBtn.disabled = true;
+          loginBtn.textContent = 'Signing in…';
+          document.getElementById('login-err').textContent = '';
+          apiKey = key;
+          const result = await apiFetch('/client/me').catch(() => null);
+          if (result) {
+            sessionStorage.setItem('clientApiKey', key);
+            me = result;
+            await loadDashboard();
+          } else {
+            apiKey = '';
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
+            document.getElementById('login-err').textContent = 'Invalid API key — please try again.';
+          }
+        }
+        loginBtn.addEventListener('click', doLogin);
+        keyInput.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+        // Focus input on render
+        setTimeout(() => keyInput.focus(), 50);
+      }
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────
+    render();
+    if (apiKey) loadDashboard();
+  </script>
+</body>
+</html>

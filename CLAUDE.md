@@ -5,11 +5,11 @@
 This project has two deliverables:
 
 1. **Landing Page** — A single-page marketing site for an AI automation consultancy targeting Adelaide SMBs.
-2. **Agent Service** — A multi-tenant FastAPI backend that hosts custom AI agents for multiple clients, handling WhatsApp/SMS/webhook inbound, LLM processing with tool use, CRM/calendar/accounting integration, and outbound messaging.
+2. **Agent Service** — A multi-tenant FastAPI backend that hosts custom AI agents for multiple clients, handling WhatsApp/SMS/Messenger/Instagram/webhook inbound, scheduled automations, LLM processing with tool use, CRM/calendar/accounting integration, and outbound messaging.
 
 Both live in a monorepo. The landing page is a static site. The agent service is a containerised Python application.
 
-**Current status**: Phases 1-6 complete. 10 tools registered. 89 tests passing. One live tenant (Test Physio Clinic) with HubSpot CRM.
+**Current status**: All core features complete. 14 tools registered. 122 tests passing. Client dashboard live at `/client/`. Scheduled automations running via APScheduler.
 
 ---
 
@@ -32,24 +32,29 @@ agent-biz/
 │   ├── docs/
 │   │   └── client-onboarding.md  # Client onboarding guide
 │   ├── app/
-│   │   ├── main.py             # FastAPI app, lifespan, CORS, static files
+│   │   ├── main.py             # FastAPI app, lifespan, CORS, static files, scheduler start
 │   │   ├── config.py           # Pydantic Settings from .env
 │   │   ├── database.py         # Async SQLAlchemy engine + session
 │   │   ├── models/
 │   │   │   ├── __init__.py     # Exports all models + enums
 │   │   │   ├── tenant.py       # Tenant + CRMType/CalendarType/AccountingType enums
 │   │   │   ├── conversation.py # Conversation history (JSONB messages)
-│   │   │   └── usage.py        # Token usage tracking
+│   │   │   ├── scheduled_job.py # ScheduledJob + DeliveryChannel enum
+│   │   │   ├── usage.py        # Token usage tracking
+│   │   │   └── webhook_error.py # Failed webhook log
 │   │   ├── schemas/
 │   │   │   ├── tenant.py       # Tenant CRUD schemas
 │   │   │   └── webhook.py      # Webhook request/response schemas
 │   │   ├── routers/
-│   │   │   ├── webhooks.py     # WhatsApp, SMS, generic webhook endpoints
+│   │   │   ├── webhooks.py     # WhatsApp, SMS, Meta, generic webhook endpoints
 │   │   │   ├── tenants.py      # Admin tenant CRUD
+│   │   │   ├── scheduled_jobs.py # Admin CRUD for scheduled automations
+│   │   │   ├── client.py       # Client-facing dashboard API (tenant auth)
 │   │   │   └── health.py       # Health check
 │   │   ├── agent/
 │   │   │   ├── loop.py         # Core agent loop (message → LLM → tools → reply)
-│   │   │   ├── tools.py        # Tool registry + 10 tool handlers
+│   │   │   ├── tools.py        # Tool registry + 14 tool handlers
+│   │   │   ├── scheduler.py    # APScheduler: cron job loading, execution, delivery
 │   │   │   └── prompts.py      # System prompt builder per tenant
 │   │   ├── integrations/
 │   │   │   ├── anthropic.py    # Claude API client
@@ -68,7 +73,9 @@ agent-biz/
 │   │   ├── utils/
 │   │   │   ├── encryption.py   # Fernet encrypt/decrypt
 │   │   │   └── logging.py      # Structured logging
-│   │   └── static/admin/       # Admin dashboard web UI
+│   │   └── static/
+│   │       ├── admin/          # Admin dashboard web UI
+│   │       └── client/         # Client-facing dashboard web UI
 │   └── tests/
 │       ├── conftest.py
 │       ├── test_agent_loop.py
@@ -113,6 +120,7 @@ Do NOT make this look like a generic AI/SaaS template. No purple gradients, no "
 - **SQLAlchemy 2.0** (async) + **PostgreSQL** + **Alembic**
 - **Anthropic SDK** for Claude (default: claude-sonnet-4-5)
 - **Twilio SDK** for WhatsApp/SMS
+- **APScheduler 3.x** (`AsyncIOScheduler`) for per-tenant cron automations
 - **httpx** for async HTTP to external APIs
 - **Pydantic v2** for schemas + settings
 - **Fernet** encryption for credentials at rest
@@ -128,10 +136,11 @@ Tenant record fields:
 - `id` (UUID), `name`, `api_key` (auto-generated)
 - `twilio_phone_number` — routes inbound WhatsApp/SMS
 - `system_prompt` — LLM system prompt
-- `tools_config` (JSONB) — `{"enabled": ["tool1", "tool2", ...]}`
+- `tools_config` (JSONB) — `{"enabled": ["tool1", ...], "http_endpoints": [...]}`
 - `crm_type` (enum: hubspot, google_sheets, splose, none) + `crm_credentials` (encrypted)
 - `calendar_type` (enum: google_calendar, calendly, none) + `calendar_credentials` (encrypted)
 - `accounting_type` (enum: xero, none) + `accounting_credentials` (encrypted)
+- `meta_page_id` + `meta_credentials` (encrypted) — for Facebook Messenger + Instagram DMs
 - `twilio_account_sid` / `twilio_auth_token` (encrypted, optional — falls back to .env)
 - `escalation_config` (JSONB) — `{"slack_webhook_url": "...", "email": "..."}`
 - `max_conversations_per_month`, `is_active`, `created_at`, `updated_at`
@@ -145,9 +154,11 @@ Tenant record fields:
 5. Max 5 iterations, 30s overall timeout
 6. On timeout/error → fallback message
 
+Scheduled jobs call the same loop with a fresh one-shot message (no persistent conversation).
+
 #### Tool System (`app/agent/tools.py`)
 
-10 tools, dispatching to integrations based on tenant config:
+14 tools, dispatching to integrations based on tenant config:
 
 | Tool | Dispatches to |
 |------|---------------|
@@ -157,25 +168,52 @@ Tenant record fields:
 | `search_contacts` | HubSpot / Splose / Google Sheets |
 | `check_availability` | Google Calendar / Calendly / Splose |
 | `book_appointment` | Google Calendar / Calendly (returns link) / Splose |
+| `list_appointments` | Google Calendar / Calendly / Splose |
+| `cancel_appointment` | Google Calendar / Calendly / Splose |
 | `escalate_to_human` | Slack + Email (Resend) |
 | `send_email` | Resend API |
 | `search_invoices` | Xero |
 | `check_payment_status` | Xero |
+| `process_document` | Claude vision (PDF, image, text URL) |
+| `call_http` | Pre-configured tenant HTTP endpoints only |
+
+#### Scheduled Automations (`app/agent/scheduler.py`)
+
+APScheduler `AsyncIOScheduler` runs in-process. On startup, loads all enabled `ScheduledJob` rows for active tenants and registers them as cron jobs. Admin CRUD operations update the scheduler in-place.
+
+`ScheduledJob` fields: `name`, `cron_expression` (5-field UTC), `prompt`, `delivery_channel` (email/slack/none), `delivery_target`, `enabled`, `last_run_at`.
+
+#### Custom HTTP Tool (`call_http`)
+
+Configured via `tools_config.http_endpoints` — a list of named endpoint objects with `name`, `url`, `method`, `headers`. The agent can only call pre-configured endpoints; no arbitrary URL access.
+
+#### Client Dashboard (`/client/`)
+
+Read-only performance dashboard for clients. Auth: tenant's own `api_key` via `X-API-Key` header (separate from admin key).
+
+Endpoints: `GET /client/me`, `GET /client/stats`, `GET /client/conversations` (anonymised identifiers).
+
+UI served at `/client/` — single-file vanilla JS, same dark aesthetic as admin dashboard.
 
 #### Webhook Endpoints
 
 - `POST /webhooks/twilio/whatsapp` — Inbound WhatsApp (Twilio signature validated)
 - `POST /webhooks/twilio/sms` — Inbound SMS (Twilio signature validated)
+- `POST /webhooks/meta` — Facebook Messenger + Instagram DMs (Meta signature validated)
 - `POST /webhooks/generic/{tenant_id}` — Web chat / custom (tenant API key auth)
 
 #### Admin Endpoints
 
-All require `X-API-Key` header matching `ADMIN_API_KEY` from `.env`.
+All require `X-API-Key: ADMIN_API_KEY`.
 
 - `GET/POST /admin/tenants` — List/create tenants
 - `GET/PUT /admin/tenants/{id}` — Get/update tenant
 - `GET /admin/tenants/{id}/usage` — Usage stats
 - `GET /admin/tenants/{id}/conversations` — Recent conversations
+- `GET /admin/tenants/{id}/webhook-errors` — Failed webhook log
+- `GET/POST /admin/tenants/{id}/scheduled-jobs` — List/create scheduled jobs
+- `GET/PUT/DELETE /admin/tenants/{id}/scheduled-jobs/{job_id}` — Manage job
+- `POST /admin/tenants/{id}/scheduled-jobs/{job_id}/run` — Trigger immediate run
 - `GET /admin/dashboard` — Admin web UI
 
 ### Configuration (`app/config.py`)
@@ -194,16 +232,20 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     default_from_email: str = "noreply@relayai.com.au"
     log_level: str = "INFO"
+    cors_origins: str = ""
 ```
 
 ### Security
 
 - Fernet encryption for all tenant credentials at rest
-- Twilio signature validation on all inbound webhooks
+- Twilio signature validation on all inbound WhatsApp/SMS webhooks
+- Meta app-secret signature validation on Messenger/Instagram webhooks
 - All DB queries scoped by tenant_id
 - In-memory sliding window rate limiter on webhook endpoints
 - No message content logged in production
 - Admin endpoints behind API key auth
+- Client dashboard uses tenant's own key (not admin key) — read-only
+- `call_http` tool only reaches pre-configured, admin-approved endpoints
 
 ### Development Workflow
 
@@ -211,9 +253,9 @@ class Settings(BaseSettings):
 docker compose up -d db          # Start Postgres
 cp .env.example .env             # Fill in API keys
 source .venv/bin/activate        # Python venv at agent-service/.venv
-alembic upgrade head             # Run migrations
+alembic upgrade head             # Run migrations (includes scheduled_jobs table)
 uvicorn app.main:app --reload    # Dev server at :8000
-pytest                           # 89 tests
+pytest                           # 122 tests
 ```
 
 For WhatsApp testing: `ngrok http 8000` → set webhook URL in Twilio console.
@@ -230,10 +272,13 @@ For WhatsApp testing: `ngrok http 8000` → set webhook URL in Twilio console.
 | Google Calendar | `calendar_type: google_calendar` | `calendar_credentials` (JSON: client_email, private_key, calendar_id) | Service account |
 | Calendly | `calendar_type: calendly` | `calendar_credentials` (JSON: api_key, event_type_uri) | Personal Access Token |
 | Xero | `accounting_type: xero` | `accounting_credentials` (JSON: OAuth2 creds) | OAuth2 (auto-refresh) |
+| Facebook Messenger | `meta_page_id` | `meta_credentials` (JSON: app_secret, page_access_token, verify_token) | Page Access Token |
+| Instagram DMs | `meta_page_id` | `meta_credentials` (same as Messenger) | Page Access Token |
 | Slack | `escalation_config.slack_webhook_url` | In escalation_config | Incoming Webhook |
 | Email (Resend) | `escalation_config.email` | `RESEND_API_KEY` in .env | API key |
 | WhatsApp | `twilio_phone_number` | `twilio_account_sid` + `twilio_auth_token` | API key |
 | SMS | `twilio_phone_number` | `twilio_account_sid` + `twilio_auth_token` | API key |
+| Custom HTTP | `tools_config.http_endpoints` | In endpoint headers (configured per endpoint) | Any |
 
 ---
 
@@ -278,5 +323,7 @@ Splose is a practice management platform for allied health and NDIS providers. A
 - **No LangChain** — agent loop is simple enough; raw Anthropic SDK avoids dependency overhead
 - **JSONB for conversation history** — stores raw Anthropic message format, replays directly
 - **Single service** — no microservices at 10-30 tenants scale
-- **No Redis** — in-memory rate limiting, Postgres for everything else
+- **No Redis** — in-memory rate limiting, APScheduler, Postgres for everything else
+- **APScheduler in-process** — avoids Celery/Redis complexity at this scale; restarts cleanly
 - **Splose for allied health** — dominant tool in Australian allied health vertical
+- **Client dashboard via tenant API key** — no separate auth system; same key used for webhook auth

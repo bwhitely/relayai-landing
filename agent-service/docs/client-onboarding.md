@@ -19,6 +19,9 @@ If you've done this before and just need the steps:
 - [ ] Test all enabled tools via generic webhook
 - [ ] Walk client through test messages
 - [ ] Iterate on system prompt (2-3 rounds)
+- [ ] Set up scheduled jobs (if applicable — weekly summaries, reminders)
+- [ ] Configure custom HTTP endpoints in tools_config (if applicable)
+- [ ] Share client dashboard URL + API key with client
 - [ ] Go live — switch to production numbers
 
 ---
@@ -642,7 +645,7 @@ curl -X POST http://localhost:8000/webhooks/generic/TENANT_ID \
 | Facebook Messenger | `meta_page_id` | `meta_credentials` (JSON: app_secret, page_access_token, verify_token) | Page Access Token |
 | Instagram DMs | `meta_page_id` | `meta_credentials` (same as Messenger) | Page Access Token |
 
-## Available Tools (10 total)
+## Available Tools (14 total)
 
 | Tool | Purpose | Requires |
 |------|---------|----------|
@@ -652,7 +655,152 @@ curl -X POST http://localhost:8000/webhooks/generic/TENANT_ID \
 | `search_contacts` | Check if customer exists | CRM integration |
 | `check_availability` | Find open booking slots | Calendar or Splose integration |
 | `book_appointment` | Book an appointment | Calendar or Splose integration |
+| `list_appointments` | List upcoming bookings | Calendar or Splose integration |
+| `cancel_appointment` | Cancel a booking | Calendar or Splose integration |
 | `escalate_to_human` | Notify business owner | Slack and/or Email config (works without, just logs) |
 | `send_email` | Send email to customer | Resend API key (in .env or per-tenant) |
 | `search_invoices` | Search invoices by customer/status | Xero integration |
 | `check_payment_status` | Get invoice payment details | Xero integration |
+| `process_document` | Extract data from PDF, image, or text file | Anthropic API (multimodal) |
+| `call_http` | Call a pre-configured external API | `http_endpoints` in tenant `tools_config` |
+
+---
+
+## Scheduled Automations
+
+Scheduled jobs let the agent run on a cron schedule independently of inbound messages. Common uses:
+
+- **Weekly summary email** — "Summarise last week's bookings and email them to the owner"
+- **Daily overdue invoice check** — "Search Xero for unpaid invoices older than 30 days and post to Slack"
+- **Monday morning briefing** — "List today's appointments and send a summary to owner@business.com"
+
+### Creating a scheduled job
+
+```bash
+curl -X POST https://yourdomain.com/admin/tenants/TENANT_ID/scheduled-jobs \
+  -H "X-API-Key: YOUR_ADMIN_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Weekly booking summary",
+    "cron_expression": "0 8 * * 1",
+    "prompt": "List all appointments booked in the past 7 days and provide a brief summary. Include the total count and any notable patterns.",
+    "delivery_channel": "email",
+    "delivery_target": "owner@business.com",
+    "enabled": true
+  }'
+```
+
+**Cron expression format** — standard 5-field UTC:
+
+| Expression | Schedule |
+|-----------|---------|
+| `0 9 * * 1` | Every Monday at 9am UTC |
+| `0 8 * * 1-5` | Weekdays at 8am UTC |
+| `0 17 * * 5` | Every Friday at 5pm UTC |
+| `0 9 1 * *` | 1st of every month at 9am UTC |
+
+Use [crontab.guru](https://crontab.guru) to build/test expressions.
+
+**Delivery options:**
+- `delivery_channel: "email"` — sends the agent's response as an HTML email. Requires Resend API key in `.env`.
+- `delivery_channel: "slack"` — posts the response to a Slack channel. Set `delivery_target` to a Slack Incoming Webhook URL.
+- `delivery_channel: "none"` — runs the agent but discards the output (useful if the prompt itself triggers actions like creating records).
+
+### Managing jobs
+
+```bash
+# List all jobs for a tenant
+curl https://yourdomain.com/admin/tenants/TENANT_ID/scheduled-jobs \
+  -H "X-API-Key: YOUR_ADMIN_KEY"
+
+# Update a job (e.g. disable it)
+curl -X PUT https://yourdomain.com/admin/tenants/TENANT_ID/scheduled-jobs/JOB_ID \
+  -H "X-API-Key: YOUR_ADMIN_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": false}'
+
+# Trigger immediately for testing (doesn't wait for cron)
+curl -X POST https://yourdomain.com/admin/tenants/TENANT_ID/scheduled-jobs/JOB_ID/run \
+  -H "X-API-Key: YOUR_ADMIN_KEY"
+
+# Delete a job
+curl -X DELETE https://yourdomain.com/admin/tenants/TENANT_ID/scheduled-jobs/JOB_ID \
+  -H "X-API-Key: YOUR_ADMIN_KEY"
+```
+
+> **Note:** Cron times are UTC. If a client is in AEST (UTC+10), `0 22 * * 0` (Sunday 10pm UTC) = Monday 8am AEST.
+
+> **Scheduler restart:** On app restart, all enabled jobs are reloaded from the database. No manual re-configuration needed.
+
+---
+
+## Custom HTTP Tool (`call_http`)
+
+The `call_http` tool lets the agent call any external API that you pre-configure per tenant. This means you can integrate the agent with any system — internal business software, booking platforms, custom databases — without writing new integration code.
+
+### Configuration
+
+Add `http_endpoints` to the tenant's `tools_config`:
+
+```bash
+curl -X PUT https://yourdomain.com/admin/tenants/TENANT_ID \
+  -H "X-API-Key: YOUR_ADMIN_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tools_config": {
+      "enabled": ["search_contacts", "call_http", "send_email"],
+      "http_endpoints": [
+        {
+          "name": "get_job_status",
+          "url": "https://api.clientsystem.com/jobs/{job_id}",
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer their-api-token",
+            "Accept": "application/json"
+          },
+          "description": "Get the status of a job by ID"
+        },
+        {
+          "name": "create_job_note",
+          "url": "https://api.clientsystem.com/jobs/{job_id}/notes",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer their-api-token",
+            "Content-Type": "application/json"
+          },
+          "description": "Add a note to an existing job"
+        }
+      ]
+    }
+  }'
+```
+
+The agent can then call these endpoints. Example: if a customer asks "What's the status of job JOB-1234?", the agent calls `call_http` with `endpoint_name: "get_job_status"`, `path_params: {"job_id": "JOB-1234"}`, and returns the status.
+
+**Security:** The agent can only call endpoints you pre-configure. It cannot reach arbitrary URLs.
+
+---
+
+## Client Dashboard
+
+Each tenant can log into a read-only performance dashboard at `https://yourdomain.com/client/`.
+
+They log in using their **tenant API key** (the `api_key` from the tenant record — not the admin key).
+
+### What they see
+- Conversations handled this month (with month-over-month comparison)
+- Self-service rate (% resolved without escalation)
+- Escalation count
+- Top channel by volume
+- Daily activity bar chart (last 30 days)
+- Channel breakdown (WhatsApp vs Web vs SMS etc.)
+- Monthly usage vs limit
+- Recent conversations (identifiers anonymised — e.g. `WhatsApp ••••5678`)
+
+### Sharing access with a client
+
+1. Get their API key: `curl https://yourdomain.com/admin/tenants/TENANT_ID -H "X-API-Key: ADMIN_KEY" | jq '.api_key'`
+2. Give the client their API key and the URL: `https://yourdomain.com/client/`
+3. They sign in — session stored in browser tab only (cleared on close)
+
+> The admin key grants full tenant management access. The tenant API key grants read-only access to their own dashboard only. These are completely separate.

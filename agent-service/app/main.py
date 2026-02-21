@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.database import close_db, init_db
-from app.routers import health, tenants, webhooks
+from app.routers import client, health, scheduled_jobs, tenants, webhooks
 from app.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,15 @@ async def lifespan(app: FastAPI):
     except Exception:
         logger.exception("Migration failed — starting anyway")
     init_db(settings.database_url)
+    from app.agent.scheduler import start_scheduler, stop_scheduler
+    from app.database import get_session_factory
+    try:
+        await start_scheduler(get_session_factory())
+        logger.info("Scheduler started")
+    except Exception:
+        logger.exception("Scheduler failed to start — running without scheduled jobs")
     yield
+    stop_scheduler()
     await close_db()
 
 
@@ -58,6 +66,8 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(tenants.router)
 app.include_router(webhooks.router)
+app.include_router(scheduled_jobs.router)
+app.include_router(client.router)
 
 _static_dir = pathlib.Path(__file__).parent / "static"
 
@@ -69,3 +79,7 @@ async def admin_dashboard():
 
 if _static_dir.is_dir():
     app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+_client_static = _static_dir / "client"
+if _client_static.is_dir():
+    app.mount("/client", StaticFiles(directory=_client_static, html=True), name="client-static")

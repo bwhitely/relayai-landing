@@ -16,7 +16,7 @@ from app.database import get_db, get_session_factory
 from app.integrations.meta import parse_meta_webhook, send_meta_message, validate_meta_signature
 from app.integrations.twilio import send_sms_message, send_whatsapp_message, validate_twilio_signature
 from app.middleware.rate_limit import check_webhook_rate_limit
-from app.models import ChannelType, Conversation, ConversationStatus, Tenant, UsageLog
+from app.models import ChannelType, Conversation, ConversationStatus, Tenant, UsageLog, WebhookError
 from app.schemas.webhook import GenericWebhookRequest, GenericWebhookResponse, ToolCallInfo
 from app.utils.encryption import decrypt
 
@@ -69,6 +69,27 @@ async def _get_or_create_conversation(
     db.add(conversation)
     await db.flush()
     return conversation
+
+
+async def _log_webhook_error(
+    db: AsyncSession,
+    channel: str,
+    error_type: str,
+    error_message: str,
+    tenant_id: uuid.UUID | None = None,
+    sender_id: str | None = None,
+) -> None:
+    try:
+        db.add(WebhookError(
+            tenant_id=tenant_id,
+            channel=channel,
+            error_type=error_type,
+            error_message=str(error_message)[:2000],
+            sender_id=sender_id,
+        ))
+        await db.flush()
+    except Exception:
+        logger.exception("Failed to write webhook error log")
 
 
 async def _log_usage(
@@ -136,7 +157,11 @@ async def twilio_whatsapp_webhook(
     )
 
     # Run agent loop
-    agent_result = await run_agent_loop(tenant, conversation.messages, body)
+    try:
+        agent_result = await run_agent_loop(tenant, conversation.messages, body)
+    except Exception as exc:
+        await _log_webhook_error(db, "whatsapp", type(exc).__name__, str(exc), tenant.id, from_number)
+        raise
 
     # Update conversation
     conversation.messages = agent_result.messages
@@ -155,11 +180,15 @@ async def twilio_whatsapp_webhook(
     )
 
     # Send reply via Twilio
-    await send_whatsapp_message(
-        to=from_number,
-        body=agent_result.response_text,
-        from_number=to_number,
-    )
+    try:
+        await send_whatsapp_message(
+            to=from_number,
+            body=agent_result.response_text,
+            from_number=to_number,
+        )
+    except Exception as exc:
+        await _log_webhook_error(db, "whatsapp", "send_failed", str(exc), tenant.id, from_number)
+        raise
 
     return {"status": "ok"}
 
@@ -209,7 +238,11 @@ async def twilio_sms_webhook(
     )
 
     # Run agent loop
-    agent_result = await run_agent_loop(tenant, conversation.messages, body)
+    try:
+        agent_result = await run_agent_loop(tenant, conversation.messages, body)
+    except Exception as exc:
+        await _log_webhook_error(db, "sms", type(exc).__name__, str(exc), tenant.id, from_number)
+        raise
 
     # Update conversation
     conversation.messages = agent_result.messages
@@ -228,11 +261,15 @@ async def twilio_sms_webhook(
     )
 
     # Send reply via Twilio SMS
-    await send_sms_message(
-        to=from_number,
-        body=agent_result.response_text,
-        from_number=to_number,
-    )
+    try:
+        await send_sms_message(
+            to=from_number,
+            body=agent_result.response_text,
+            from_number=to_number,
+        )
+    except Exception as exc:
+        await _log_webhook_error(db, "sms", "send_failed", str(exc), tenant.id, from_number)
+        raise
 
     return {"status": "ok"}
 
@@ -287,7 +324,11 @@ async def generic_webhook(
     )
 
     # Run agent loop
-    agent_result = await run_agent_loop(tenant, conversation.messages, body.message)
+    try:
+        agent_result = await run_agent_loop(tenant, conversation.messages, body.message)
+    except Exception as exc:
+        await _log_webhook_error(db, "web", type(exc).__name__, str(exc), tenant.id, body.sender_id)
+        raise
 
     # Update conversation
     conversation.messages = agent_result.messages

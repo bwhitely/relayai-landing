@@ -1273,6 +1273,148 @@
       }
     }
 
+    /* ---- ROI CALCULATOR ---- */
+    #roi-calculator {
+      border-top: 1px solid var(--border);
+    }
+
+    .roi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+
+    .roi-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .roi-slider-group label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    .roi-slider-group label span {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .roi-slider-group input[type="range"] {
+      width: 100%;
+      appearance: none;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .roi-slider-group input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .roi-slider-group input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+    }
+
+    .roi-slider-group .roi-range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    .roi-output {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      position: sticky;
+      top: 6rem;
+    }
+
+    .roi-output-heading {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 1.5rem;
+    }
+
+    .roi-stat {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .roi-stat:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .roi-stat-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .roi-stat-value {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .roi-stat-value.highlight {
+      color: var(--accent);
+    }
+
+    .roi-stat-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    .roi-cta {
+      margin-top: 1.75rem;
+      width: 100%;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .roi-grid {
+        grid-template-columns: 1fr;
+      }
+      .roi-output {
+        position: static;
+      }
+    }
+
     /* ---- PRICING ---- */
     #pricing {
       border-top: 1px solid var(--border);
@@ -1310,9 +1452,70 @@
       border-top: 1px solid var(--border);
     }
 
-    .form-wrapper {
+    .contact-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
       margin-top: 3rem;
-      max-width: 520px;
+      align-items: start;
+    }
+
+    .contact-split-divider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding-top: 6rem;
+    }
+
+    .contact-split-divider::before,
+    .contact-split-divider::after {
+      content: '';
+      width: 1px;
+      height: 60px;
+      background: var(--border);
+    }
+
+    .contact-col-label {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 1.25rem;
+    }
+
+    .calendly-wrapper {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .form-wrapper {
+      max-width: 100%;
+    }
+
+    @media (max-width: 860px) {
+      .contact-split {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      .contact-split-divider {
+        flex-direction: row;
+        padding-top: 0;
+      }
+      .contact-split-divider::before,
+      .contact-split-divider::after {
+        width: 60px;
+        height: 1px;
+      }
     }
 
     .form-group {
@@ -1896,6 +2099,55 @@
       </div>
     </section>
 
+    <!-- ROI CALCULATOR -->
+    <section id="roi-calculator">
+      <div class="container">
+        <p class="section-label">ROI Calculator</p>
+        <h2 class="section-heading">How much is manual work costing you?</h2>
+        <p class="section-sub">Adjust the sliders to match your business and see what automation could save you.</p>
+        <div class="roi-grid">
+          <div class="roi-inputs">
+            <div class="roi-slider-group">
+              <label>Enquiries per week <span id="roi-enquiries-val">40</span></label>
+              <input type="range" id="roi-enquiries" min="5" max="200" value="40" step="5">
+              <div class="roi-range-labels"><span>5</span><span>200</span></div>
+            </div>
+            <div class="roi-slider-group">
+              <label>Minutes spent per enquiry <span id="roi-minutes-val">8 min</span></label>
+              <input type="range" id="roi-minutes" min="2" max="30" value="8" step="1">
+              <div class="roi-range-labels"><span>2 min</span><span>30 min</span></div>
+            </div>
+            <div class="roi-slider-group">
+              <label>Staff hourly rate <span id="roi-rate-val">$30</span></label>
+              <input type="range" id="roi-rate" min="20" max="80" value="30" step="5">
+              <div class="roi-range-labels"><span>$20</span><span>$80</span></div>
+            </div>
+          </div>
+          <div class="roi-output">
+            <p class="roi-output-heading">Your numbers</p>
+            <div class="roi-stat">
+              <p class="roi-stat-label">Hours spent on enquiries per month</p>
+              <p class="roi-stat-value" id="roi-hours">23 hrs</p>
+            </div>
+            <div class="roi-stat">
+              <p class="roi-stat-label">Monthly cost in staff time</p>
+              <p class="roi-stat-value" id="roi-cost">$693</p>
+            </div>
+            <div class="roi-stat">
+              <p class="roi-stat-label">Estimated monthly saving with RelayAI</p>
+              <p class="roi-stat-value highlight" id="roi-saving">$393 – $493</p>
+              <p class="roi-stat-sub" id="roi-saving-sub">After typical automation cost of $200–$300/month</p>
+            </div>
+            <div class="roi-stat">
+              <p class="roi-stat-label">Estimated payback period</p>
+              <p class="roi-stat-value" id="roi-payback">1–2 months</p>
+            </div>
+            <a href="#contact" class="btn roi-cta">Get a Custom Quote</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- PRICING -->
     <section id="pricing">
       <div class="container">
@@ -1967,44 +2219,65 @@
       <div class="container">
         <p class="section-label">Get in Touch</p>
         <h2 class="section-heading">Let's talk about what you need.</h2>
-        <p class="section-sub">Fill in the form below and we'll be in touch within one business day.</p>
-        <div class="form-wrapper">
-          <form id="contact-form" novalidate>
-            <div class="form-group">
-              <label for="name">Name</label>
-              <input type="text" id="name" name="name" placeholder="Your name" required>
-              <p class="form-error" data-field="name">Please enter your name.</p>
+        <p class="section-sub">Book a free 15-minute call directly, or send a message and we'll be in touch within one business day.</p>
+        <div class="contact-split">
+
+          <!-- Calendly -->
+          <div>
+            <p class="contact-col-label">Book a call</p>
+            <div class="calendly-wrapper">
+              <div class="calendly-inline-widget" data-url="https://calendly.com/bendotwhitely/relayai-consult?background_color=1a1a1e&text_color=e8e6e3&primary_color=d4952a" style="min-width:280px;height:660px;"></div>
             </div>
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" placeholder="you@example.com" required>
-              <p class="form-error" data-field="email">Please enter a valid email address.</p>
-            </div>
-            <div class="form-group">
-              <label for="business-type">Business Type</label>
-              <select id="business-type" name="business_type" required>
-                <option value="" disabled selected>Select your industry</option>
-                <option value="trades">Trades &amp; Home Services</option>
-                <option value="real-estate">Real Estate</option>
-                <option value="health">Clinics &amp; Health</option>
-                <option value="professional">Professional Services</option>
-                <option value="hospitality">Hospitality &amp; Food</option>
-                <option value="retail">Retail</option>
-                <option value="other">Other</option>
-              </select>
-              <p class="form-error" data-field="business_type">Please select a business type.</p>
-            </div>
-            <div class="form-group">
-              <label for="message">Message <span style="color: var(--text-muted); font-weight: 400;">(optional)</span></label>
-              <textarea id="message" name="message" placeholder="Tell us a bit about your business and what you're looking for..."></textarea>
-            </div>
-            <button type="submit" class="btn">Send Message</button>
-          </form>
-          <div class="form-success" id="form-success">
-            <strong>Thanks for reaching out.</strong> We've received your message and will be in touch within one business day.
           </div>
+
+          <!-- Divider -->
+          <div style="display:contents">
+          </div>
+
+          <!-- Form -->
+          <div>
+            <p class="contact-col-label">Or send a message</p>
+            <div class="form-wrapper">
+              <form id="contact-form" novalidate>
+                <div class="form-group">
+                  <label for="name">Name</label>
+                  <input type="text" id="name" name="name" placeholder="Your name" required>
+                  <p class="form-error" data-field="name">Please enter your name.</p>
+                </div>
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                  <p class="form-error" data-field="email">Please enter a valid email address.</p>
+                </div>
+                <div class="form-group">
+                  <label for="business-type">Business Type</label>
+                  <select id="business-type" name="business_type" required>
+                    <option value="" disabled selected>Select your industry</option>
+                    <option value="trades">Trades &amp; Home Services</option>
+                    <option value="real-estate">Real Estate</option>
+                    <option value="health">Clinics &amp; Health</option>
+                    <option value="professional">Professional Services</option>
+                    <option value="hospitality">Hospitality &amp; Food</option>
+                    <option value="retail">Retail</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <p class="form-error" data-field="business_type">Please select a business type.</p>
+                </div>
+                <div class="form-group">
+                  <label for="message">Message <span style="color: var(--text-muted); font-weight: 400;">(optional)</span></label>
+                  <textarea id="message" name="message" placeholder="Tell us a bit about your business and what you're looking for..."></textarea>
+                </div>
+                <button type="submit" class="btn">Send Message</button>
+              </form>
+              <div class="form-success" id="form-success">
+                <strong>Thanks for reaching out.</strong> We've received your message and will be in touch within one business day.
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
+      <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
     </section>
 
   </main>
@@ -2556,6 +2829,50 @@
           }
         }
       });
+    })();
+
+    // ---- ROI CALCULATOR ----
+    (function () {
+      var enquiriesEl = document.getElementById('roi-enquiries');
+      var minutesEl   = document.getElementById('roi-minutes');
+      var rateEl      = document.getElementById('roi-rate');
+
+      function update() {
+        var enquiries = +enquiriesEl.value;
+        var minutes   = +minutesEl.value;
+        var rate      = +rateEl.value;
+
+        document.getElementById('roi-enquiries-val').textContent = enquiries;
+        document.getElementById('roi-minutes-val').textContent   = minutes + ' min';
+        document.getElementById('roi-rate-val').textContent      = '$' + rate;
+
+        var hoursPerMonth  = (enquiries * 4.33 * minutes) / 60;
+        var costPerMonth   = hoursPerMonth * rate;
+        var automationLow  = 200;
+        var automationHigh = 300;
+        var savingLow      = Math.max(0, costPerMonth - automationHigh);
+        var savingHigh     = Math.max(0, costPerMonth - automationLow);
+        var paybackMonths  = costPerMonth > 0 ? (automationHigh / costPerMonth) : 0;
+
+        document.getElementById('roi-hours').textContent  = Math.round(hoursPerMonth) + ' hrs';
+        document.getElementById('roi-cost').textContent   = '$' + Math.round(costPerMonth).toLocaleString();
+
+        if (savingHigh <= 0) {
+          document.getElementById('roi-saving').textContent     = 'Talk to us';
+          document.getElementById('roi-saving-sub').textContent = 'Your volume may suit a lower-tier plan';
+        } else {
+          document.getElementById('roi-saving').textContent     = '$' + Math.round(savingLow).toLocaleString() + ' – $' + Math.round(savingHigh).toLocaleString();
+          document.getElementById('roi-saving-sub').textContent = 'After typical automation cost of $' + automationLow + '–$' + automationHigh + '/month';
+        }
+
+        var paybackText = paybackMonths < 1 ? 'Under 1 month' : Math.round(paybackMonths) + ' month' + (Math.round(paybackMonths) > 1 ? 's' : '');
+        document.getElementById('roi-payback').textContent = paybackText;
+      }
+
+      [enquiriesEl, minutesEl, rateEl].forEach(function (el) {
+        el.addEventListener('input', update);
+      });
+      update();
     })();
 
     // ---- GA EVENT TRACKING ----
