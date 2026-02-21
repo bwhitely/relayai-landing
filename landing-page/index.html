@@ -2848,8 +2848,8 @@
 
         var hoursPerMonth  = (enquiries * 4.33 * minutes) / 60;
         var costPerMonth   = hoursPerMonth * rate;
-        var automationLow  = 200;
-        var automationHigh = 300;
+        var automationLow  = 50;
+        var automationHigh = 150;
         var savingLow      = Math.max(0, costPerMonth - automationHigh);
         var savingHigh     = Math.max(0, costPerMonth - automationLow);
         var paybackMonths  = costPerMonth > 0 ? (automationHigh / costPerMonth) : 0;
@@ -2862,7 +2862,6 @@
           document.getElementById('roi-saving-sub').textContent = 'Your volume may suit a lower-tier plan';
         } else {
           document.getElementById('roi-saving').textContent     = '$' + Math.round(savingLow).toLocaleString() + ' – $' + Math.round(savingHigh).toLocaleString();
-          document.getElementById('roi-saving-sub').textContent = 'After typical automation cost of $' + automationLow + '–$' + automationHigh + '/month';
         }
 
         var paybackText = paybackMonths < 1 ? 'Under 1 month' : Math.round(paybackMonths) + ' month' + (Math.round(paybackMonths) > 1 ? 's' : '');
