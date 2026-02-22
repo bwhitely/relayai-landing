@@ -473,6 +473,109 @@
       z-index: 0;
     }
 
+    /* ---- HERO TERMINAL IMAGE ---- */
+    .hero-image {
+      margin-top: 3.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-image::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 80px;
+      background: radial-gradient(ellipse at center, rgba(212, 149, 42, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .terminal-window {
+      background: #0c0c0e;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(212, 149, 42, 0.07),
+        0 32px 80px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      max-width: 700px;
+    }
+
+    .terminal-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.65rem 1rem;
+      background: rgba(255, 255, 255, 0.025);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .tdot {
+      display: block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .tdot-r { background: #ff5f57; }
+    .tdot-y { background: #ffbd2e; }
+    .tdot-g { background: #28c840; }
+
+    .terminal-title-text {
+      flex: 1;
+      text-align: center;
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.22);
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
+    }
+
+    .terminal-body {
+      padding: 1.25rem 1.5rem 1.75rem;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      min-height: 280px;
+      overflow-x: auto;
+      transition: opacity 0.4s ease;
+    }
+
+    .t-line {
+      display: block;
+      white-space: pre;
+      opacity: 0;
+      transform: translateX(-6px);
+      animation: termLine 0.22s ease forwards;
+    }
+
+    .t-header  { color: #d4952a; }
+    .t-divider { color: rgba(255, 255, 255, 0.1); }
+    .t-info    { color: rgba(255, 255, 255, 0.6); }
+    .t-tool    { color: rgba(255, 255, 255, 0.88); }
+    .t-success { color: #4ade80; }
+    .t-stat    { color: #d4952a; }
+
+    @keyframes termLine {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 600px) {
+      .terminal-body {
+        font-size: 0.7rem;
+        padding: 1rem 1rem 1.25rem;
+      }
+    }
+
     /* ---- LOGO STRIP ---- */
     .logo-strip {
       border-top: 1px solid var(--border);
@@ -1769,6 +1872,21 @@
           <a href="#contact" class="btn">Book a Free Consultation</a>
           <a href="#demo" class="btn btn-ghost">Try the Live Demo</a>
         </div>
+
+        <!-- HERO TERMINAL IMAGE -->
+        <div class="hero-image">
+          <div class="terminal-window">
+            <div class="terminal-titlebar">
+              <div class="terminal-dots">
+                <span class="tdot tdot-r"></span>
+                <span class="tdot tdot-y"></span>
+                <span class="tdot tdot-g"></span>
+              </div>
+              <span class="terminal-title-text">relay.agent — automation engine</span>
+            </div>
+            <div class="terminal-body" id="heroTerminal"></div>
+          </div>
+        </div>
       </div>
       <div class="hero-scroll">
         <span>Scroll</span>
@@ -2872,6 +2990,80 @@
         el.addEventListener('input', update);
       });
       update();
+    })();
+
+    // ---- HERO TERMINAL ANIMATION ----
+    (function () {
+      var terminal = document.getElementById('heroTerminal');
+      if (!terminal) return;
+
+      var D = '\u2500'.repeat(54);
+      var lines = [
+        { t: '\u25cf relay.agent \u2014 1 active workflow',               c: 't-header',  d: 0    },
+        { t: '',                                                           c: '',          d: 200  },
+        { t: D,                                                            c: 't-divider', d: 300  },
+        { t: '',                                                           c: '',          d: 400  },
+        { t: '  09:14:32  inbound   WhatsApp +61 412 *** ***',            c: 't-info',    d: 700  },
+        { t: '  09:14:32  matched   tenant \u2192 Adelaide Physio Clinic', c: 't-info',   d: 1200 },
+        { t: '  09:14:33  agent     processing enquiry...',               c: 't-info',    d: 1700 },
+        { t: '',                                                           c: '',          d: 2000 },
+        { t: '  09:14:33  tool \u203a    search_contacts("sarah m")',     c: 't-tool',    d: 2200 },
+        { t: '            result    patient #1042 \u00b7 Sarah M. \u2714', c: 't-success', d: 2650 },
+        { t: '  09:14:34  tool \u203a    check_availability(next_7_days)', c: 't-tool',   d: 3150 },
+        { t: '            result    6 open slots \u2014 Fri 10:00am',     c: 't-success', d: 3600 },
+        { t: '  09:14:34  tool \u203a    book_appointment(Fri 10:00am)',  c: 't-tool',    d: 4100 },
+        { t: '            result    confirmed \u2014 ref #A8821 \u2714',  c: 't-success', d: 4550 },
+        { t: '  09:14:35  tool \u203a    send_message(patient)',          c: 't-tool',    d: 5050 },
+        { t: '            result    WhatsApp confirmation sent \u2714',   c: 't-success', d: 5500 },
+        { t: '',                                                           c: '',          d: 5900 },
+        { t: '  3.1s  \u00b7  4 tools called  \u00b7  0 humans involved', c: 't-stat',   d: 6100 },
+        { t: '',                                                           c: '',          d: 6400 },
+        { t: D,                                                            c: 't-divider', d: 6500 },
+      ];
+
+      var timers = [];
+
+      function clearTerminal() {
+        while (terminal.firstChild) {
+          terminal.removeChild(terminal.firstChild);
+        }
+      }
+
+      function run() {
+        timers.forEach(clearTimeout);
+        timers = [];
+        var isFirst = !terminal.firstChild;
+        if (!isFirst) {
+          terminal.style.opacity = '0';
+        }
+        setTimeout(function () {
+          clearTerminal();
+          terminal.style.opacity = '1';
+          lines.forEach(function (line, i) {
+            timers.push(setTimeout(function () {
+              var el = document.createElement('span');
+              el.className = 't-line' + (line.c ? ' ' + line.c : '');
+              el.textContent = line.t || '\u00a0';
+              terminal.appendChild(el);
+              if (i === lines.length - 1) {
+                timers.push(setTimeout(run, 3500));
+              }
+            }, line.d));
+          });
+        }, isFirst ? 0 : 450);
+      }
+
+      if ('IntersectionObserver' in window) {
+        var termObs = new IntersectionObserver(function (entries) {
+          if (entries[0].isIntersecting) {
+            run();
+            termObs.disconnect();
+          }
+        }, { threshold: 0.1 });
+        termObs.observe(terminal);
+      } else {
+        run();
+      }
     })();
 
     // ---- GA EVENT TRACKING ----
