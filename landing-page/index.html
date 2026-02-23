@@ -627,8 +627,9 @@
       font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
       font-size: 0.8rem;
       line-height: 1.8;
-      min-height: 280px;
+      height: 516px; /* pre-allocated: 20 lines × (0.8rem × 1.8) + padding — prevents layout shift during animation */
       overflow-x: auto;
+      overflow-y: hidden;
       transition: opacity 0.4s ease;
     }
 
@@ -655,6 +656,7 @@
       .terminal-body {
         font-size: 0.7rem;
         padding: 1rem 1rem 1.25rem;
+        height: 444px; /* 20 lines × (0.7rem × 1.8) + padding */
       }
     }
 
@@ -2566,15 +2568,15 @@
     </section>
 
     <!-- TESTIMONIALS — replace placeholder cards with real testimonials as they come in -->
-    <section id="testimonials" class="testimonials-section">
+    <!-- <section id="testimonials" class="testimonials-section">
       <div class="container">
         <p class="section-label">Why clients choose us</p>
         <h2 class="section-heading reveal">Direct access to the person who builds it.</h2>
         <p class="section-sub reveal reveal-d1">No account managers, no junior developers. Every engagement is scoped and built by the founder directly, so you get someone who's accountable for the outcome, not just the delivery.</p>
-        <div class="testimonials-grid">
+        <div class="testimonials-grid"> -->
 
           <!-- Founder note — replace with real testimonial once available -->
-          <div class="testimonial-card reveal reveal-d1">
+          <!-- <div class="testimonial-card reveal reveal-d1">
             <div class="testimonial-quote-mark">&ldquo;</div>
             <blockquote>I started RelayAI because I watched small businesses waste hours every week on work that should have been running itself. I want to help Australian SMBs remain efficient, modern and competitive it todays digital landscape.</blockquote>
             <div class="testimonial-author">
@@ -2584,7 +2586,7 @@
                 <div class="testimonial-role">Founder · RelayAI · Adelaide, SA</div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- TODO: Replace with first real client testimonial -->
           <!-- <div class="testimonial-card reveal reveal-d2">
@@ -2612,9 +2614,9 @@
             </div>
           </div> -->
 
-        </div>
+        <!-- </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- ROI CALCULATOR -->
     <section id="roi-calculator">
@@ -3412,29 +3414,86 @@
       if (!terminal) return;
 
       var D = '\u2500'.repeat(54);
-      var lines = [
-        { t: '\u25cf relay.agent \u2014 1 active workflow',               c: 't-header',  d: 0    },
-        { t: '',                                                           c: '',          d: 200  },
-        { t: D,                                                            c: 't-divider', d: 300  },
-        { t: '',                                                           c: '',          d: 400  },
-        { t: '  09:14:32  inbound   WhatsApp +61 412 *** ***',            c: 't-info',    d: 700  },
-        { t: '  09:14:32  matched   tenant \u2192 Adelaide Physio Clinic', c: 't-info',   d: 1200 },
-        { t: '  09:14:33  agent     processing enquiry...',               c: 't-info',    d: 1700 },
-        { t: '',                                                           c: '',          d: 2000 },
-        { t: '  09:14:33  tool \u203a    search_contacts("sarah m")',     c: 't-tool',    d: 2200 },
-        { t: '            result    patient #1042 \u00b7 Sarah M. \u2714', c: 't-success', d: 2650 },
-        { t: '  09:14:34  tool \u203a    check_availability(next_7_days)', c: 't-tool',   d: 3150 },
-        { t: '            result    6 open slots \u2014 Fri 10:00am',     c: 't-success', d: 3600 },
-        { t: '  09:14:34  tool \u203a    book_appointment(Fri 10:00am)',  c: 't-tool',    d: 4100 },
-        { t: '            result    confirmed \u2014 ref #A8821 \u2714',  c: 't-success', d: 4550 },
-        { t: '  09:14:35  tool \u203a    send_message(patient)',          c: 't-tool',    d: 5050 },
-        { t: '            result    WhatsApp confirmation sent \u2714',   c: 't-success', d: 5500 },
-        { t: '',                                                           c: '',          d: 5900 },
-        { t: '  3.1s  \u00b7  4 tools called  \u00b7  0 humans involved', c: 't-stat',   d: 6100 },
-        { t: '',                                                           c: '',          d: 6400 },
-        { t: D,                                                            c: 't-divider', d: 6500 },
+      var H = '\u25cf relay.agent \u2014 automation engine';
+
+      // Three rotating scenarios — each plays in full before the next begins
+      var scenarios = [
+
+        // Scenario 1: Inbound multi-channel enquiry → appointment booking
+        [
+          { t: H,                                                                      c: 't-header',  d: 0    },
+          { t: '',                                                                     c: '',          d: 200  },
+          { t: D,                                                                     c: 't-divider', d: 300  },
+          { t: '',                                                                     c: '',          d: 400  },
+          { t: '  09:14:32  trigger    inbound \u00b7 SMS / WhatsApp / Email / Web',  c: 't-info',    d: 700  },
+          { t: '  09:14:32  matched    \u2192 Your Business',                         c: 't-info',    d: 1200 },
+          { t: '  09:14:33  agent      analysing \u0026 routing request...',          c: 't-info',    d: 1700 },
+          { t: '',                                                                     c: '',          d: 2000 },
+          { t: '  09:14:33  tool \u203a   search_contacts("sarah m")',                c: 't-tool',    d: 2200 },
+          { t: '            result     contact #1042 \u00b7 Sarah M. \u2714',         c: 't-success', d: 2650 },
+          { t: '  09:14:34  tool \u203a   check_availability(next_7_days)',           c: 't-tool',    d: 3150 },
+          { t: '            result     3 slots \u2014 Fri 10:00, 11:30, 14:00',       c: 't-success', d: 3600 },
+          { t: '  09:14:34  tool \u203a   book_appointment(Fri 10:00am)',             c: 't-tool',    d: 4100 },
+          { t: '            result     confirmed \u2014 ref #A8821 \u2714',           c: 't-success', d: 4550 },
+          { t: '  09:14:35  tool \u203a   send_reply(customer)',                      c: 't-tool',    d: 5050 },
+          { t: '            result     confirmation dispatched \u2714',               c: 't-success', d: 5500 },
+          { t: '',                                                                     c: '',          d: 5900 },
+          { t: '  3.1s  \u00b7  4 tools called  \u00b7  0 humans involved',          c: 't-stat',    d: 6100 },
+          { t: '',                                                                     c: '',          d: 6400 },
+          { t: D,                                                                     c: 't-divider', d: 6500 },
+        ],
+
+        // Scenario 2: Scheduled daily finance job → invoice tracking + payment reminders
+        [
+          { t: H,                                                                      c: 't-header',  d: 0    },
+          { t: '',                                                                     c: '',          d: 200  },
+          { t: D,                                                                     c: 't-divider', d: 300  },
+          { t: '',                                                                     c: '',          d: 400  },
+          { t: '  08:00:00  trigger    scheduled \u00b7 daily \u00b7 08:00 ACST',    c: 't-info',    d: 700  },
+          { t: '  08:00:00  matched    \u2192 Your Business',                         c: 't-info',    d: 1200 },
+          { t: '  08:00:01  workflow   running daily finance jobs...',                c: 't-info',    d: 1700 },
+          { t: '',                                                                     c: '',          d: 2000 },
+          { t: '  08:00:01  tool \u203a   search_invoices(xero, since: yesterday)',   c: 't-tool',    d: 2200 },
+          { t: '            result     4 new invoices \u00b7 $12,840 total \u2714',   c: 't-success', d: 2650 },
+          { t: '  08:00:02  tool \u203a   check_payment_status(overdue: >14d)',       c: 't-tool',    d: 3150 },
+          { t: '            result     2 overdue \u00b7 $4,200 outstanding',          c: 't-success', d: 3600 },
+          { t: '  08:00:02  tool \u203a   send_email(payment_reminder \u00d7 2)',     c: 't-tool',    d: 4100 },
+          { t: '            result     reminders dispatched \u2714',                  c: 't-success', d: 4550 },
+          { t: '  08:00:03  tool \u203a   update_lead(status: awaiting_payment)',     c: 't-tool',    d: 5050 },
+          { t: '            result     2 CRM records updated \u2714',                 c: 't-success', d: 5500 },
+          { t: '',                                                                     c: '',          d: 5900 },
+          { t: '  2.4s  \u00b7  4 tools called  \u00b7  $4,200 chased automatically',c: 't-stat',    d: 6100 },
+          { t: '',                                                                     c: '',          d: 6400 },
+          { t: D,                                                                     c: 't-divider', d: 6500 },
+        ],
+
+        // Scenario 3: Webhook — web form submission → CRM pipeline + lead nurture
+        [
+          { t: H,                                                                      c: 't-header',  d: 0    },
+          { t: '',                                                                     c: '',          d: 200  },
+          { t: D,                                                                     c: 't-divider', d: 300  },
+          { t: '',                                                                     c: '',          d: 400  },
+          { t: '  11:32:07  trigger    webhook \u00b7 form submission \u00b7 website',c: 't-info',    d: 700  },
+          { t: '  11:32:07  matched    \u2192 Your Business',                         c: 't-info',    d: 1200 },
+          { t: '  11:32:08  workflow   processing new lead...',                       c: 't-info',    d: 1700 },
+          { t: '',                                                                     c: '',          d: 2000 },
+          { t: '  11:32:08  tool \u203a   create_lead(james r. \u00b7 source: web)', c: 't-tool',    d: 2200 },
+          { t: '            result     contact #1091 added to CRM \u2714',            c: 't-success', d: 2650 },
+          { t: '  11:32:08  tool \u203a   send_email(welcome \u00b7 james@...)',      c: 't-tool',    d: 3150 },
+          { t: '            result     welcome email dispatched \u2714',              c: 't-success', d: 3600 },
+          { t: '  11:32:09  tool \u203a   update_lead(pipeline: new \u00b7 score: high)', c: 't-tool', d: 4100 },
+          { t: '            result     lead scored \u0026 prioritised \u2714',        c: 't-success', d: 4550 },
+          { t: '  11:32:09  tool \u203a   send_email(notify: sales_team)',            c: 't-tool',    d: 5050 },
+          { t: '            result     team alerted \u00b7 assigned to queue \u2714', c: 't-success', d: 5500 },
+          { t: '',                                                                     c: '',          d: 5900 },
+          { t: '  1.8s  \u00b7  4 tools called  \u00b7  lead replied to in <2s',     c: 't-stat',    d: 6100 },
+          { t: '',                                                                     c: '',          d: 6400 },
+          { t: D,                                                                     c: 't-divider', d: 6500 },
+        ],
+
       ];
 
+      var scenarioIdx = 0;
       var timers = [];
 
       function clearTerminal() {
@@ -3446,6 +3505,8 @@
       function run() {
         timers.forEach(clearTimeout);
         timers = [];
+        var lines = scenarios[scenarioIdx % scenarios.length];
+        scenarioIdx++;
         var isFirst = !terminal.firstChild;
         if (!isFirst) {
           terminal.style.opacity = '0';
