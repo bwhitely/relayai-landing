@@ -28,6 +28,88 @@
   <meta name="googlebot" content="index, follow">
   <link rel="alternate" hreflang="en-AU" href="https://www.relayai.com.au/">
   <link rel="alternate" hreflang="x-default" href="https://www.relayai.com.au/">
+
+  <!-- Structured data: LocalBusiness + Person (LLM / knowledge graph signals) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["LocalBusiness", "ProfessionalService"],
+        "@id": "https://www.relayai.com.au/#business",
+        "name": "RelayAI",
+        "legalName": "RelayAI",
+        "description": "Business automation for Australian small and medium businesses. We build custom workflow automations, AI agents, system integrations, document processing pipelines, and automated reporting — using your existing tools and built around how your business actually operates.",
+        "url": "https://www.relayai.com.au",
+        "telephone": "+61403357524",
+        "email": "ben@relayai.com.au",
+        "foundingDate": "2025",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Adelaide",
+          "addressRegion": "SA",
+          "postalCode": "5000",
+          "addressCountry": "AU"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -34.9285,
+          "longitude": 138.6007
+        },
+        "areaServed": [
+          { "@type": "Country", "name": "Australia" },
+          { "@type": "City", "name": "Adelaide" }
+        ],
+        "serviceType": [
+          "Business Process Automation",
+          "Workflow Automation",
+          "AI Agent Development",
+          "System Integration",
+          "Document Processing Automation",
+          "Automated Reporting"
+        ],
+        "knowsAbout": [
+          "Business automation",
+          "AI agents",
+          "WhatsApp automation",
+          "Invoice processing automation",
+          "Appointment booking automation",
+          "CRM integration",
+          "Xero integration",
+          "Google Calendar integration"
+        ],
+        "founder": { "@id": "https://www.relayai.com.au/#founder" },
+        "sameAs": [
+          "https://www.linkedin.com/company/relayai-au"
+        ]
+      },
+      {
+        "@type": "Person",
+        "@id": "https://www.relayai.com.au/#founder",
+        "name": "Ben",
+        "jobTitle": "Founder",
+        "worksFor": { "@id": "https://www.relayai.com.au/#business" },
+        "email": "ben@relayai.com.au",
+        "telephone": "+61403357524",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Adelaide",
+          "addressRegion": "SA",
+          "addressCountry": "AU"
+        },
+        "knowsAbout": [
+          "Business automation",
+          "AI agents",
+          "Workflow automation",
+          "Software integration",
+          "SMB technology consulting"
+        ],
+        "url": "https://www.relayai.com.au"
+      }
+    ]
+  }
+  </script>
+
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
   <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>

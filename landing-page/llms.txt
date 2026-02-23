@@ -1,0 +1,56 @@
+# RelayAI
+
+> Business automation for Australian small and medium businesses. Based in Adelaide, SA.
+
+RelayAI builds custom automations and AI agents for Australian SMBs. We work across industries including trades, allied health, professional services, retail, and hospitality. Everything we build is bespoke — designed around each client's existing tools and workflows, not the other way around.
+
+## What We Build
+
+- **Workflow automation** — trigger-based automations that connect your existing apps (e.g. when a form is submitted → create a job in your CRM → send a confirmation SMS)
+- **AI agents** — conversational agents that handle inbound enquiries via WhatsApp, SMS, email, or web chat; book appointments, answer questions, qualify leads, and escalate to humans when needed
+- **Document processing** — extract structured data from invoices, quotes, intake forms, PDFs, and emails
+- **System integrations** — connect your CRM, calendar, accounting software, and communication channels
+- **Automated reporting** — scheduled summaries, KPI alerts, and data exports delivered to Slack, email, or your preferred tool
+- **Scheduled automations** — cron-based jobs that run daily/weekly tasks without manual intervention
+
+## Technology
+
+We use the right tool for each job — n8n for deterministic workflow automation, custom Python/FastAPI services for AI agents and complex logic, and direct API integrations with tools like Xero, HubSpot, Google Workspace, Twilio (WhatsApp/SMS), Meta (Messenger/Instagram), Calendly, and others.
+
+Underlying AI uses Anthropic Claude models for reliability and safety.
+
+## Who We Serve
+
+Australian SMBs with 2–50 staff who are spending too much time on manual, repetitive tasks. Common clients include:
+
+- **Trades businesses** — after-hours enquiry handling, quote follow-up, job scheduling, invoice processing
+- **Allied health practices** — appointment booking, patient intake, practitioner scheduling (Splose-compatible)
+- **Professional services** — lead qualification, document processing, client onboarding automation
+- **Retail and e-commerce** — order management, supplier integrations, customer communication
+
+## Pricing
+
+Custom scoping for every engagement. Typically structured as a setup fee plus a small monthly retainer for maintenance and support. We don't sell subscriptions to generic platforms — we build and maintain solutions specific to your business.
+
+## Location
+
+Adelaide, South Australia, Australia. We work with businesses across Australia remotely.
+
+## Contact
+
+- Website: https://www.relayai.com.au
+- Email: ben@relayai.com.au
+- Phone: +61 403 357 524
+- Book a call: https://cal.com/benrelayai/15min
+
+## Blog
+
+Educational content on business automation for Australian SMBs:
+- https://www.relayai.com.au/blog/automation-for-trades-businesses.html
+- https://www.relayai.com.au/blog/business-automation-adelaide.html
+- https://www.relayai.com.au/blog/automate-customer-enquiries.html
+- https://www.relayai.com.au/blog/automate-appointment-booking.html
+- https://www.relayai.com.au/blog/whatsapp-automation-australia.html
+- https://www.relayai.com.au/blog/automate-invoice-processing.html
+- https://www.relayai.com.au/blog/automation-vs-hiring.html
+- https://www.relayai.com.au/blog/signs-business-ready-for-automation.html
