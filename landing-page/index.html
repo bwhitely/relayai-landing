@@ -2436,6 +2436,12 @@
                   calLink: "benrelayai/15min",
                 });
                 Cal.ns["15min"]("ui", {"cssVarsPerTheme":{"dark":{"cal-brand":"#292929"}},"hideEventTypeDetails":false,"layout":"month_view"});
+                Cal.ns["15min"]("on", {
+                  action: "bookingSuccessful",
+                  callback: function() {
+                    gtag('event', 'BOOK_APPOINTMENT');
+                  }
+                });
               </script>
             </div>
           </div>
