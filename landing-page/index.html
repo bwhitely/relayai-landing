@@ -1851,6 +1851,252 @@
       max-height: 300px;
     }
 
+    /* ---- STATS STRIP ---- */
+    .stats-strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+      padding: 3rem 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 2rem;
+      position: relative;
+    }
+
+    .stat-item + .stat-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15%;
+      height: 70%;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      max-width: 160px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .stat-item + .stat-item::before {
+        display: none;
+      }
+    }
+
+    /* ---- DOT GRID BACKGROUND ---- */
+    .has-dot-grid {
+      position: relative;
+    }
+
+    .has-dot-grid::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .has-dot-grid > .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ---- SCROLL REVEAL ---- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+    .reveal-d4 { transition-delay: 0.4s; }
+    .reveal-d5 { transition-delay: 0.5s; }
+
+    /* ---- CTA PULSE ---- */
+    .btn-pulse {
+      position: relative;
+      overflow: visible;
+    }
+
+    .btn-pulse::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 11px;
+      border: 2px solid var(--accent);
+      opacity: 0;
+      animation: ctaPulse 2.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes ctaPulse {
+      0%, 100% { opacity: 0; transform: scale(1); }
+      40%       { opacity: 0.45; transform: scale(1.04); }
+      70%       { opacity: 0; transform: scale(1.07); }
+    }
+
+    /* ---- CARD TOP-BORDER REVEAL ON HOVER ---- */
+    .card {
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    /* ---- TESTIMONIALS ---- */
+    .testimonials-section {
+      border-top: 1px solid var(--border);
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .testimonials-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .testimonials-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .testimonial-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .testimonial-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .testimonial-card:hover {
+      border-color: rgba(212, 149, 42, 0.35);
+      box-shadow: 0 8px 30px var(--accent-glow);
+    }
+
+    .testimonial-quote-mark {
+      color: var(--accent);
+      opacity: 0.35;
+      font-size: 3rem;
+      line-height: 1;
+      font-family: Georgia, serif;
+      margin-bottom: -0.75rem;
+    }
+
+    .testimonial-card blockquote {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text);
+      font-style: normal;
+      flex: 1;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .testimonial-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(212, 149, 42, 0.12);
+      border: 1px solid rgba(212, 149, 42, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .testimonial-name {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .testimonial-role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
     /* ---- FOOTER ---- */
     footer {
       border-top: 1px solid var(--border);
@@ -1951,7 +2197,7 @@
         <h1>Your Business, Running While You Sleep.</h1>
         <p>We build custom workflow automations, system integrations, document processing, and AI agents for Australian small & medium businesses — so repetitive work handles itself, your tools talk to each other, and you can focus on what actually grows your business.</p>
         <div class="hero-ctas">
-          <a href="#contact" class="btn">Book a Free Consultation</a>
+          <a href="#contact" class="btn btn-pulse">Book a Free Consultation</a>
           <a href="#demo" class="btn btn-ghost">Try the Live Demo</a>
         </div>
 
@@ -1975,6 +2221,26 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
       </div>
     </section>
+
+    <!-- STATS STRIP -->
+    <div class="stats-strip">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item reveal">
+            <span class="stat-number">~2wk</span>
+            <span class="stat-label">Average time from consultation to working automation</span>
+          </div>
+          <div class="stat-item reveal reveal-d2">
+            <span class="stat-number">5–10h</span>
+            <span class="stat-label">Hours of manual work saved per week, per automation</span>
+          </div>
+          <div class="stat-item reveal reveal-d3">
+            <span class="stat-number">&infin;</span>
+            <span class="stat-label">Fully bespoke — built around your business, not a template</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- INTEGRATION LOGO STRIP -->
     <div class="logo-strip">
@@ -2191,21 +2457,21 @@
         <h2 class="section-heading">Three steps. Then it runs itself.</h2>
         <p class="section-sub">No complicated setup. No months-long build.</p>
         <div class="steps">
-          <div class="step">
+          <div class="step reveal">
             <div class="step-number">1</div>
             <div>
               <h3>We learn your business</h3>
               <p>We dig into your workflows, tools, and pain points to understand exactly where automation would make the biggest difference.</p>
             </div>
           </div>
-          <div class="step">
+          <div class="step reveal reveal-d2">
             <div class="step-number">2</div>
             <div>
               <h3>We build your solution</h3>
               <p>Workflow automations, system integrations, document processing, reporting, or AI agents &mdash; designed around your specific needs and connected to your existing tools.</p>
             </div>
           </div>
-          <div class="step">
+          <div class="step reveal reveal-d4">
             <div class="step-number">3</div>
             <div>
               <h3>It works for you 24/7</h3>
@@ -2238,32 +2504,32 @@
         <p class="section-sub">Every solution is designed specifically for your workflows. Here's what that can look like.</p>
         <div class="cards">
 
-          <div class="card">
+          <div class="card reveal">
             <h3>Automate Enquiry Handling</h3>
             <p>AI agents or auto-responders that handle incoming enquiries instantly &mdash; across WhatsApp, SMS, email, or web chat &mdash; so nothing slips through.</p>
           </div>
 
-          <div class="card">
+          <div class="card reveal reveal-d1">
             <h3>Connect Your Systems</h3>
             <p>Sync your CRM, calendar, accounting, and comms tools so data flows between them automatically instead of being copied by hand.</p>
           </div>
 
-          <div class="card">
+          <div class="card reveal reveal-d2">
             <h3>Eliminate Manual Data Entry</h3>
             <p>Auto-populate forms, records, and reports from the data you already have &mdash; no more re-typing the same information across three different systems.</p>
           </div>
 
-          <div class="card">
+          <div class="card reveal reveal-d3">
             <h3>Streamline Repetitive Workflows</h3>
             <p>Turn multi-step manual processes into automated flows &mdash; approvals, follow-ups, notifications, and handoffs that run without you.</p>
           </div>
 
-          <div class="card">
+          <div class="card reveal reveal-d4">
             <h3>Keep Humans in Control</h3>
             <p>Escalation, approvals, and dashboards so you always know what's happening and can step in when a human touch is needed.</p>
           </div>
 
-          <div class="card">
+          <div class="card reveal reveal-d5">
             <h3>Custom-Built For You</h3>
             <p>Every solution matches how your business actually works. No off-the-shelf templates &mdash; we build around your processes, your tools, your rules.</p>
           </div>
@@ -2273,7 +2539,7 @@
     </section>
 
     <!-- WHO IT'S FOR -->
-    <section id="who-its-for">
+    <section id="who-its-for" class="has-dot-grid">
       <div class="container">
         <p class="section-label">Who It's For</p>
         <h2 class="section-heading">Built for Australian businesses that are too busy for busywork.</h2>
@@ -2295,6 +2561,57 @@
             <div class="industry-marker"></div>
             <div><span>Professional Services</span> &mdash; <em>Accountants, lawyers, consultants</em></div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS — replace placeholder cards with real testimonials as they come in -->
+    <section id="testimonials" class="testimonials-section">
+      <div class="container">
+        <p class="section-label">Why clients choose us</p>
+        <h2 class="section-heading reveal">Direct access to the person who builds it.</h2>
+        <p class="section-sub reveal reveal-d1">No account managers, no junior developers. Every engagement is scoped and built by the founder directly, so you get someone who's accountable for the outcome, not just the delivery.</p>
+        <div class="testimonials-grid">
+
+          <!-- Founder note — replace with real testimonial once available -->
+          <div class="testimonial-card reveal reveal-d1">
+            <div class="testimonial-quote-mark">&ldquo;</div>
+            <blockquote>I started RelayAI because I watched small businesses waste hours every week on work that should have been running itself. I want to help Australian SMBs remain efficient, modern and competitive it todays digital landscape.</blockquote>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">B</div>
+              <div>
+                <div class="testimonial-name">Ben</div>
+                <div class="testimonial-role">Founder · RelayAI · Adelaide, SA</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TODO: Replace with first real client testimonial -->
+          <!-- <div class="testimonial-card reveal reveal-d2">
+            <div class="testimonial-quote-mark">&ldquo;</div>
+            <blockquote>Replace with real client quote here.</blockquote>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">X</div>
+              <div>
+                <div class="testimonial-name">Client Name</div>
+                <div class="testimonial-role">Business Name · Industry</div>
+              </div>
+            </div>
+          </div> -->
+
+          <!-- TODO: Replace with second real client testimonial -->
+          <!-- <div class="testimonial-card reveal reveal-d3">
+            <div class="testimonial-quote-mark">&ldquo;</div>
+            <blockquote>Replace with real client quote here.</blockquote>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">Y</div>
+              <div>
+                <div class="testimonial-name">Client Name</div>
+                <div class="testimonial-role">Business Name · Industry</div>
+              </div>
+            </div>
+          </div> -->
+
         </div>
       </div>
     </section>
@@ -2349,7 +2666,7 @@
     </section>
 
     <!-- PRICING -->
-    <section id="pricing">
+    <section id="pricing" class="has-dot-grid">
       <div class="container">
         <p class="section-label">Pricing</p>
         <h2 class="section-heading">Custom-Built. Clear Pricing.</h2>
@@ -2493,7 +2810,6 @@
 
         </div>
       </div>
-      <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
     </section>
 
   </main>
@@ -3202,6 +3518,28 @@
           observer.observe(s);
         });
       }
+    })();
+
+    // ---- SCROLL REVEAL ----
+    (function () {
+      if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal').forEach(function (el) {
+          el.classList.add('visible');
+        });
+        return;
+      }
+      var revealObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            revealObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(function (el) {
+        revealObs.observe(el);
+      });
     })();
   </script>
 </body>
