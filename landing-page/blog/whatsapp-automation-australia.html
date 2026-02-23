@@ -42,8 +42,8 @@
     "headline": "WhatsApp Business Automation in Australia: A Practical Guide",
     "description": "A practical guide to WhatsApp business automation in Australia. Learn what you can automate, how it works, and how to get started.",
     "author": {
-      "@type": "Organization",
-      "name": "RelayAI",
+      "@type": "Person",
+      "name": "Ben",
       "url": "https://www.relayai.com.au"
     },
     "publisher": {
@@ -56,12 +56,52 @@
       }
     },
     "datePublished": "2026-02-18",
-    "dateModified": "2026-02-18",
+    "dateModified": "2026-02-23",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://www.relayai.com.au/blog/whatsapp-automation-australia.html"
     },
     "image": "https://www.relayai.com.au/og-image.png"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between WhatsApp Business App and the WhatsApp Business API?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The WhatsApp Business App is a free app designed for small businesses managing conversations manually. The API is a developer integration that enables full automation — automated replies, booking flows, CRM integration, and handling multiple conversations simultaneously without a human actively monitoring. For any serious automation, you need the API, accessed through an approved provider such as Twilio or 360dialog."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is WhatsApp automation legal in Australia?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, provided you comply with Australian privacy laws (the Privacy Act 1988) and only message customers who have opted in or initiated contact. Automated responses to inbound messages are straightforwardly compliant. Outbound marketing messages require clear opt-in consent."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does WhatsApp automation cost for an Australian small business?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For most Australian SMBs, the monthly cost of running WhatsApp automation (including API provider fees and hosting) falls between $50 and $200 per month depending on message volume. There is typically a one-time setup and integration cost. Compared to the time saved in manual responses and the revenue from faster lead conversion, the ROI is usually fast."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What industries benefit most from WhatsApp automation in Australia?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Allied health clinics (physiotherapy, psychology, occupational therapy), trades businesses (plumbers, electricians, builders), real estate agencies, hospitality and accommodation, and professional services firms all see strong results. Any business that receives a high volume of booking, enquiry, or follow-up messages is a strong candidate."
+        }
+      }
+    ]
   }
   </script>
   <style>
@@ -344,6 +384,48 @@
       color: var(--accent-hover);
     }
 
+    /* ---- AUTHOR BIO ---- */
+    .author-bio {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 2.5rem 0 1.5rem;
+    }
+
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111113;
+    }
+
+    .author-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .author-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
     /* ---- CTA BOX ---- */
     .article-cta {
       background: var(--bg-card);
@@ -546,11 +628,11 @@
 
         <h3>FAQ responses</h3>
 
-        <p>Most businesses answer the same 10-15 questions over and over. What are your hours? Where are you located? How much does X cost? Do you offer Y? An automated system can detect these questions and respond with accurate, up-to-date answers without anyone on your team lifting a finger.</p>
+        <p>Most businesses answer the same 10-15 questions over and over. What are your hours? Where are you located? How much does X cost? Do you offer Y? <a href="/blog/automate-customer-enquiries.html">Automating customer enquiries</a> like these means your team gets accurate, up-to-date answers out instantly without anyone on your team lifting a finger.</p>
 
         <h3>Appointment booking and confirmations</h3>
 
-        <p>A customer messages "I'd like to book an appointment for Thursday." The automation checks availability in your calendar system, offers available time slots, and confirms the booking. It can also send reminders 24 hours before the appointment. No phone tag, no back-and-forth emails.</p>
+        <p>A customer messages "I'd like to book an appointment for Thursday." The automation checks availability in your calendar system, offers available time slots, and confirms the booking. It can also send reminders 24 hours before the appointment. <a href="/blog/automate-appointment-booking.html">Automated appointment booking</a> eliminates phone tag and back-and-forth emails entirely.</p>
 
         <h3>Order status updates</h3>
 
@@ -636,6 +718,16 @@
 
         <p>The businesses getting the most value are the ones that treat it as a proper channel, not an afterthought. That means connecting it to their real systems, setting it up thoughtfully, and maintaining it as their business evolves.</p>
 
+        <!-- AUTHOR BIO -->
+        <div class="author-bio">
+          <div class="author-avatar" aria-hidden="true">B</div>
+          <div>
+            <p class="author-name">Ben &mdash; Founder, RelayAI</p>
+            <p class="author-desc">Ben builds custom automation systems for Australian small and medium businesses. Based in Adelaide, he works across allied health, professional services, trades, and retail &mdash; connecting the tools businesses already use to eliminate manual work.</p>
+          </div>
+        </div>
+
+        <!-- CTA BOX -->
         <div class="article-cta">
           <h3>Want to set up WhatsApp automation for your business?</h3>
           <p>We build custom WhatsApp automation that connects to your CRM, calendar, and existing tools. No lock-in contracts. Built for Australian businesses.</p>

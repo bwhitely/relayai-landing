@@ -2,49 +2,61 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.relayai.com.au/</loc>
-    <lastmod>2026-02-19</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.relayai.com.au/blog/</loc>
-    <lastmod>2026-02-19</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.relayai.com.au/blog/automation-for-trades-businesses.html</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.relayai.com.au/blog/business-automation-adelaide.html</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.relayai.com.au/blog/automate-customer-enquiries.html</loc>
-    <lastmod>2026-02-19</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.relayai.com.au/blog/whatsapp-automation-australia.html</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.relayai.com.au/blog/automate-invoice-processing.html</loc>
-    <lastmod>2026-02-17</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.relayai.com.au/blog/automation-vs-hiring.html</loc>
-    <lastmod>2026-02-16</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.relayai.com.au/blog/automate-appointment-booking.html</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.relayai.com.au/blog/signs-business-ready-for-automation.html</loc>
-    <lastmod>2026-02-14</lastmod>
+    <lastmod>2026-02-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

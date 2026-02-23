@@ -39,8 +39,8 @@
     "headline": "Business Automation vs Hiring: When to Automate Instead of Recruit",
     "description": "Should you hire or automate? A practical guide for Australian small businesses on when automation makes more sense than recruiting new staff.",
     "author": {
-      "@type": "Organization",
-      "name": "RelayAI",
+      "@type": "Person",
+      "name": "Ben",
       "url": "https://www.relayai.com.au"
     },
     "publisher": {
@@ -53,12 +53,52 @@
       }
     },
     "datePublished": "2026-02-16",
-    "dateModified": "2026-02-16",
+    "dateModified": "2026-02-23",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://www.relayai.com.au/blog/automation-vs-hiring.html"
     },
     "image": "https://www.relayai.com.au/og-image.png"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "When should a small business automate instead of hiring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Automate when the work is repetitive, follows a consistent pattern, and does not require human judgement or empathy. Good candidates include data entry between systems, appointment reminders, invoice follow-up, lead acknowledgement, and report generation. Hire when the work requires decision-making, client relationships, physical presence, or skills that cannot be scripted."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does it cost to hire an admin person in Australia?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The base salary for an admin role in Australia is typically $55,000 to $65,000 per year. With superannuation (currently 11.5%), leave entitlements, recruitment costs, and the management time of onboarding, the true first-year cost is usually $75,000 to $90,000. Admin staff turnover — the average tenure is around two years — restarts much of that cost."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can automation replace a full-time employee?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rarely in full, and that should not be the goal. Automation handles the repetitive, rule-based portions of a role — freeing your team to focus on work that actually requires a person. Most businesses use automation alongside their existing team rather than instead of one, resulting in the same headcount doing higher-value work."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the ROI of automation compared to hiring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A well-targeted automation project typically costs less than one month of a full-time salary to build and run. Unlike hiring, there is no recruitment cost, no leave entitlements, no superannuation, and no turnover. If the automation handles tasks that would have otherwise required additional headcount, the payback period is usually under three months."
+        }
+      }
+    ]
   }
   </script>
   <style>
@@ -335,6 +375,17 @@
       font-weight: 600;
     }
 
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.2s ease;
+    }
+
+    .article-body a:hover {
+      color: var(--accent-hover);
+    }
+
     .article-body blockquote {
       border-left: 3px solid var(--accent);
       padding-left: 1.25rem;
@@ -342,6 +393,48 @@
       color: var(--text-muted);
       font-size: 1.05rem;
       line-height: 1.8;
+    }
+
+    /* ---- AUTHOR BIO ---- */
+    .author-bio {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 2.5rem 0 1.5rem;
+    }
+
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111113;
+    }
+
+    .author-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .author-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
     }
 
     /* ---- CTA BOX ---- */
@@ -558,7 +651,7 @@
 
         <h2>When to automate (not hire)</h2>
 
-        <p>There are clear signals that a task is better handled by automation than by a new pair of hands.</p>
+        <p>There are clear <a href="/blog/signs-business-ready-for-automation.html">signs your business is ready for automation</a> rather than another hire. Look for these patterns in your day-to-day operations.</p>
 
         <h3>The task is repetitive and rule-based</h3>
 
@@ -566,7 +659,7 @@
 
         <h3>The task is high-volume but low-complexity</h3>
 
-        <p>Responding to frequently asked questions. Routing enquiries to the right person. Sending appointment confirmations and reminders. These tasks are not difficult, but they eat up hours of someone's day. Automating them frees your team to handle the enquiries that actually need a human brain.</p>
+        <p>Routing enquiries to the right person, sending appointment confirmations and reminders, and <a href="/blog/automate-customer-enquiries.html">automating customer enquiries</a> like frequently asked questions — these tasks are not difficult, but they eat up hours of someone's day. Automating them frees your team to handle the enquiries that actually need a human brain.</p>
 
         <h3>The task happens outside business hours</h3>
 
@@ -627,6 +720,15 @@
         <p>If the answer is no to any of them, you are probably looking at a task that needs a person. Hire well, and then look at whether you can automate the lower-value tasks around that role so the person you hire can focus on what they do best.</p>
 
         <p>The goal is not to run a business with zero employees. The goal is to never hire someone to do work that a machine should be doing, and to never ask a machine to do work that needs a human touch.</p>
+
+        <!-- AUTHOR BIO -->
+        <div class="author-bio">
+          <div class="author-avatar" aria-hidden="true">B</div>
+          <div>
+            <p class="author-name">Ben &mdash; Founder, RelayAI</p>
+            <p class="author-desc">Ben builds custom automation systems for Australian small and medium businesses. Based in Adelaide, he works across allied health, professional services, trades, and retail &mdash; connecting the tools businesses already use to eliminate manual work.</p>
+          </div>
+        </div>
 
       </div>
 

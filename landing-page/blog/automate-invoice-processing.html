@@ -39,8 +39,8 @@
     "headline": "How to Automate Invoice Processing Without Changing Your Accounting Software",
     "description": "Learn how to automate invoice processing for your small business without switching accounting software. Practical steps for Australian SMBs using Xero, MYOB, or QuickBooks.",
     "author": {
-      "@type": "Organization",
-      "name": "RelayAI",
+      "@type": "Person",
+      "name": "Ben",
       "url": "https://www.relayai.com.au"
     },
     "publisher": {
@@ -53,12 +53,52 @@
       }
     },
     "datePublished": "2026-02-17",
-    "dateModified": "2026-02-17",
+    "dateModified": "2026-02-23",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://www.relayai.com.au/blog/automate-invoice-processing.html"
     },
     "image": "https://www.relayai.com.au/og-image.png"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can I automate invoice processing without switching accounting software?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Invoice automation connects to your existing accounting system — Xero, MYOB, or QuickBooks — rather than replacing it. The automation handles document capture, data extraction, and entry into your existing system, so your accountant and bookkeeper continue working in the software they already know."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does invoice automation work with Xero in Australia?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Xero has a well-documented API that allows automation to create bills, invoices, contacts, and reconciliation records directly. Supplier invoices can be captured, extracted, and entered into Xero automatically — including correct GST treatment — without manual data entry."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How many invoices do I need to process per month before automation is worth it?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "As a rough guide, businesses processing more than 20 invoices per month typically see a clear return on automation. At that volume, the time spent on manual processing, the risk of data entry errors, and the late payment consequences usually outweigh the cost of setting up an automated system."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can automated invoice processing handle GST correctly?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Automated extraction identifies GST amounts separately from the base amount and maps them correctly when creating records in your accounting software. For Australian businesses, this includes handling both GST-inclusive and GST-exclusive invoice formats."
+        }
+      }
+    ]
   }
   </script>
   <style>
@@ -348,6 +388,17 @@
       margin-bottom: 0;
     }
 
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.2s ease;
+    }
+
+    .article-body a:hover {
+      color: var(--accent-hover);
+    }
+
     /* ---- PROCESS BOX ---- */
     .process-box {
       background: var(--bg-card);
@@ -379,6 +430,48 @@
     .process-arrow {
       color: var(--accent);
       margin: 0 0.15rem;
+    }
+
+    /* ---- AUTHOR BIO ---- */
+    .author-bio {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 2.5rem 0 1.5rem;
+    }
+
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111113;
+    }
+
+    .author-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .author-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
     }
 
     /* ---- CTA BOX ---- */
@@ -633,7 +726,7 @@
 
           <h2>When it makes sense to automate</h2>
 
-          <p>Invoice processing automation is not for every business. If a sole trader processes five invoices a month, the manual process is fine. But it starts making strong financial sense when:</p>
+          <p>Invoice processing automation is not for every business. If a sole trader processes five invoices a month, the manual process is fine. But understanding the <a href="/blog/signs-business-ready-for-automation.html">signs your business is ready for automation</a> helps you know when the calculus changes. It starts making strong financial sense when:</p>
 
           <ul>
             <li><strong>Processing more than 20 invoices per month.</strong> This is roughly where the time cost of manual processing starts to exceed the cost of automation. At 50+ invoices, it is not close.</li>
@@ -679,21 +772,30 @@
 
           <p>With automation handling capture, extraction, matching, and routing, that drops to 1 to 3 hours per month, mostly spent on the exceptions that need human judgement. The invoices that flow cleanly, which is the majority, require zero manual effort.</p>
 
-          <p>That is real time back. Not theoretical. Not "up to". Actual hours that someone in the business was previously spending on data entry and email chasing that now get spent on something more valuable.</p>
-
-          <!-- CTA -->
-          <div class="article-cta">
-            <h3>Want to automate your invoice processing?</h3>
-            <p>We build invoice processing automations that connect to your existing accounting software. No migration, no disruption, no lock-in contracts. Tell us about your current process and we will scope a solution.</p>
-            <a href="/#contact" class="btn">Get in Touch</a>
-          </div>
-
-          <a href="/blog/" class="back-link">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Back to all posts
-          </a>
+          <p>That is real time back. Not theoretical. Not "up to". Actual hours that someone in the business was previously spending on data entry and email chasing that now get spent on something more valuable. If you are weighing up whether to bring on additional admin staff to handle the volume, it is worth reading about <a href="/blog/automation-vs-hiring.html">automation vs hiring</a> before making that call.</p>
 
         </div>
+
+        <!-- AUTHOR BIO -->
+        <div class="author-bio">
+          <div class="author-avatar" aria-hidden="true">B</div>
+          <div>
+            <p class="author-name">Ben &mdash; Founder, RelayAI</p>
+            <p class="author-desc">Ben builds custom automation systems for Australian small and medium businesses. Based in Adelaide, he works across allied health, professional services, trades, and retail &mdash; connecting the tools businesses already use to eliminate manual work.</p>
+          </div>
+        </div>
+
+        <!-- CTA BOX -->
+        <div class="article-cta">
+          <h3>Want to automate your invoice processing?</h3>
+          <p>We build invoice processing automations that connect to your existing accounting software. No migration, no disruption, no lock-in contracts. Tell us about your current process and we will scope a solution.</p>
+          <a href="/#contact" class="btn">Get in Touch</a>
+        </div>
+
+        <a href="/blog/" class="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to all posts
+        </a>
 
       </div>
     </article>

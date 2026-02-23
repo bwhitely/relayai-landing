@@ -39,8 +39,8 @@
     "headline": "How to Automate Customer Enquiries for Your Small Business",
     "description": "Learn how to automate customer enquiries for your small business. From auto-responses to AI agents — practical steps for Australian SMBs.",
     "author": {
-      "@type": "Organization",
-      "name": "RelayAI",
+      "@type": "Person",
+      "name": "Ben",
       "url": "https://www.relayai.com.au"
     },
     "publisher": {
@@ -53,12 +53,52 @@
       }
     },
     "datePublished": "2026-02-19",
-    "dateModified": "2026-02-19",
+    "dateModified": "2026-02-23",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://www.relayai.com.au/blog/automate-customer-enquiries.html"
     },
     "image": "https://www.relayai.com.au/og-image.png"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I automate customer enquiries for my small business?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The most effective approach starts with your highest-volume enquiry channel — usually WhatsApp, your website contact form, or phone. An automated system can acknowledge the enquiry immediately, gather key information (name, service needed, preferred time), check availability, and either book the appointment or route the enquiry to the right person. The technology connects your messaging channels to your calendar, CRM, and existing software."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the benefit of responding to customer enquiries faster?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Research consistently shows that the first business to respond wins the job the majority of the time. After an hour without a response, the probability of converting a lead drops significantly. Automation enables an immediate response at any time of day — including outside business hours — eliminating the gap between when a customer reaches out and when they get a reply."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which enquiry channels can be automated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "WhatsApp, SMS, Facebook Messenger, Instagram DMs, website contact forms, and email are all automatable. The right mix depends on where your customers actually contact you. For most Australian service businesses, WhatsApp and web forms are the highest-volume channels."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to change my existing tools to automate customer enquiries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Automation works alongside your existing CRM, calendar, and booking tools. If you are already using HubSpot, Google Calendar, Calendly, or a practice management system like Splose or Cliniko, the automation connects to those tools rather than replacing them."
+        }
+      }
+    ]
   }
   </script>
   <style>
@@ -358,6 +398,48 @@
       color: var(--accent-hover);
     }
 
+    /* ---- AUTHOR BIO ---- */
+    .author-bio {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 2.5rem 0 1.5rem;
+    }
+
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111113;
+    }
+
+    .author-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .author-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
     /* ---- CTA BOX ---- */
     .article-cta {
       margin-top: 3rem;
@@ -508,7 +590,7 @@
 
         <p>This happens constantly. Research from Lead Connect found that 78% of customers buy from the first business that responds to their enquiry. Harvard Business Review data shows that responding within five minutes makes you 21 times more likely to qualify a lead than if you respond after 30 minutes. After an hour, your chances drop off a cliff.</p>
 
-        <p>For small businesses without a dedicated receptionist or sales team, this is a structural problem. You cannot physically respond to every enquiry instantly. And the channels keep multiplying: email, web forms, WhatsApp, SMS, Facebook Messenger, Instagram DMs. That is where enquiry automation comes in.</p>
+        <p>For small businesses without a dedicated receptionist or sales team, this is a structural problem. You cannot physically respond to every enquiry instantly. And the channels keep multiplying: email, web forms, <a href="/blog/whatsapp-automation-australia.html">WhatsApp automation</a>, SMS, Facebook Messenger, Instagram DMs. That is where enquiry automation comes in.</p>
 
         <h2>What is enquiry automation?</h2>
 
@@ -568,7 +650,7 @@
 
         <h3>Level 3: AI agents that hold conversations</h3>
 
-        <p>This is where automation moves from reactive to proactive. Instead of just acknowledging or routing, an AI agent actually handles the enquiry: answers questions, checks availability, books appointments, and creates records &mdash; all in a natural back-and-forth conversation.</p>
+        <p>This is where automation moves from reactive to proactive. Instead of just acknowledging or routing, an AI agent actually handles the enquiry: answers questions, checks availability, handles <a href="/blog/automate-appointment-booking.html">automated appointment booking</a>, and creates records &mdash; all in a natural back-and-forth conversation.</p>
 
         <p>What this looks like:</p>
         <ul>
@@ -634,6 +716,15 @@
 
         <p>Start with Level 1 if you have nothing in place. The jump from zero automation to auto-acknowledgement is the highest-impact change. Then build from there based on volume and complexity.</p>
 
+      </div>
+
+      <!-- AUTHOR BIO -->
+      <div class="author-bio">
+        <div class="author-avatar" aria-hidden="true">B</div>
+        <div>
+          <p class="author-name">Ben &mdash; Founder, RelayAI</p>
+          <p class="author-desc">Ben builds custom automation systems for Australian small and medium businesses. Based in Adelaide, he works across allied health, professional services, trades, and retail &mdash; connecting the tools businesses already use to eliminate manual work.</p>
+        </div>
       </div>
 
       <!-- CTA BOX -->

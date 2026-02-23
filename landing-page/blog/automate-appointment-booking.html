@@ -39,8 +39,8 @@
     "headline": "How to Automate Appointment Booking for Clinics and Service Businesses",
     "description": "Learn how to automate appointment booking for your clinic or service business. Real-time availability, instant confirmations, and automated reminders across every channel.",
     "author": {
-      "@type": "Organization",
-      "name": "RelayAI",
+      "@type": "Person",
+      "name": "Ben",
       "url": "https://www.relayai.com.au"
     },
     "publisher": {
@@ -53,12 +53,52 @@
       }
     },
     "datePublished": "2026-02-15",
-    "dateModified": "2026-02-15",
+    "dateModified": "2026-02-23",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://www.relayai.com.au/blog/automate-appointment-booking.html"
     },
     "image": "https://www.relayai.com.au/og-image.png"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do automated appointment booking systems work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A customer sends a message — via WhatsApp, SMS, your website, or another channel — expressing interest in booking. The automated system checks real availability in your calendar or practice management software, offers options, confirms the booking, creates the appointment record, and sends a confirmation. Reminders are sent automatically before the appointment. No manual involvement is required unless the customer has an unusual request."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which practice management systems can be integrated for automated booking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We integrate with Splose, Cliniko, Nookal, Timely, and Google Calendar, as well as Calendly for businesses that use scheduling links. If your practice management system has an API, integration is typically possible."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much can automated reminders reduce no-shows?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Industry data consistently shows that automated reminders reduce no-shows by 30 to 50 percent. For a clinic running 40 appointments per day with a 10 percent no-show rate, that translates to two or three additional completed appointments per day — a significant revenue impact with no additional marketing spend."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can automated booking handle after-hours enquiries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This is one of the primary benefits. An automated system responds immediately regardless of the time — including late evenings and weekends. Customers can enquire, receive available times, confirm a booking, and get a confirmation without waiting for business hours. For service businesses that lose leads to competitors who respond faster, this is often the most valuable aspect of automation."
+        }
+      }
+    ]
   }
   </script>
   <style>
@@ -348,6 +388,59 @@
       margin-bottom: 0;
     }
 
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.2s ease;
+    }
+
+    .article-body a:hover {
+      color: var(--accent-hover);
+    }
+
+    /* ---- AUTHOR BIO ---- */
+    .author-bio {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 2.5rem 0 1.5rem;
+    }
+
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111113;
+    }
+
+    .author-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .author-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
     /* ---- CTA BOX ---- */
     .article-cta {
       background: var(--bg-card);
@@ -546,7 +639,7 @@
 
         <h2>It's not just your website</h2>
 
-        <p>Here's the thing most booking solutions miss: customers don't all want to book the same way. Some will use your website. But plenty of others will message you on WhatsApp, reply to your Instagram post, send a Facebook message, or text your business number directly.</p>
+        <p>Here's the thing most booking solutions miss: customers don't all want to book the same way. Some will use your website. But plenty of others will message you on <a href="/blog/whatsapp-automation-australia.html">WhatsApp</a>, reply to your Instagram post, send a Facebook message, or text your business number directly.</p>
 
         <p>If your booking automation only works on your website, you're covering one channel and leaving the rest to manual handling. That defeats the purpose.</p>
 
@@ -618,7 +711,7 @@
 
         <p><strong>A way to receive messages.</strong> At minimum, this means a website with a chat widget. But the real value comes from connecting the channels your customers already use — WhatsApp Business, SMS, Instagram, Facebook Messenger. You don't need all of them on day one. Start with the one or two channels where you get the most enquiries.</p>
 
-        <p><strong>Automation to connect them.</strong> This is the piece that ties it all together. The automation layer sits between your messaging channels and your calendar, handling the conversation, checking availability, confirming bookings, sending reminders, and creating records. This is the part that replaces the manual work your receptionist or admin staff currently does.</p>
+        <p><strong>Automation to connect them.</strong> This is the piece that ties it all together. The automation layer sits between your messaging channels and your calendar, handling the conversation, checking availability, confirming bookings, sending reminders, and creating records. This is the part that replaces the manual work your receptionist or admin staff currently does. If you've been looking at <a href="/blog/automate-customer-enquiries.html">automating customer enquiries</a> more broadly, booking is usually the highest-value place to start.</p>
 
         <p>The common mistake is trying to build this from scratch with a patchwork of Zapier automations, chatbot builders, and form tools. It works until it doesn't — and when it breaks, nobody knows which piece failed. A purpose-built system that handles the entire flow is more reliable and easier to maintain.</p>
 
@@ -630,6 +723,15 @@
 
         <p>For clinics and service businesses running on appointments, this is one of the highest-impact automations you can implement. The ROI shows up almost immediately in fewer missed calls, fewer no-shows, and more bookings that actually stick.</p>
 
+      </div>
+
+      <!-- AUTHOR BIO -->
+      <div class="author-bio">
+        <div class="author-avatar" aria-hidden="true">B</div>
+        <div>
+          <p class="author-name">Ben &mdash; Founder, RelayAI</p>
+          <p class="author-desc">Ben builds custom automation systems for Australian small and medium businesses. Based in Adelaide, he works across allied health, professional services, trades, and retail &mdash; connecting the tools businesses already use to eliminate manual work.</p>
+        </div>
       </div>
 
       <!-- CTA BOX -->
