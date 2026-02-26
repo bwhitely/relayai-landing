@@ -20,6 +20,8 @@ agent-biz/
 ├── CLAUDE.md
 ├── landing-page/
 │   └── index.html              # Single-file landing page (HTML + CSS + JS)
+├── n8n-templates/          # Reusable n8n workflow JSON exports (see n8n-templates/README.md)
+├── clients/                # Per-client records — discovery notes and active workflow inventory
 ├── agent-service/
 │   ├── README.md               # System documentation
 │   ├── pyproject.toml
@@ -327,3 +329,58 @@ Splose is a practice management platform for allied health and NDIS providers. A
 - **APScheduler in-process** — avoids Celery/Redis complexity at this scale; restarts cleanly
 - **Splose for allied health** — dominant tool in Australian allied health vertical
 - **Client dashboard via tenant API key** — no separate auth system; same key used for webhook auth
+
+---
+
+## Part 3: n8n Workflow Platform
+
+### Overview
+
+For clients who need tool-to-tool automation without a conversational AI agent, RelayAI runs a managed n8n instance. n8n handles workflow automation — Xero triggers, form → CRM, appointment reminders, Slack notifications, etc.
+
+- **n8n instance:** https://n8n.relayai.com.au (admin only — clients never log in)
+- **Templates:** `n8n-templates/` in the monorepo root (JSON workflow exports)
+- **Client records:** `clients/[slug]/workflows.md`
+- **Deployment:** Railway service `n8n` + Railway Postgres `n8n-db`
+- **Deployment guide:** `agent-service/docs/deployment.md` (n8n section)
+
+### Delivery track decision
+
+| Signal | Platform |
+|---|---|
+| Client wants WhatsApp / SMS / web chat bot | AI Agent service |
+| Client wants tool-to-tool automation, no conversation | n8n |
+| Client needs both | Both — agent service tenant + n8n project, independently configured |
+
+### Client isolation
+
+Each client has their own n8n **Project** named `Client — [Business Name]`. Credentials configured inside a Project are not visible to other Projects. All Projects live on the shared n8n instance.
+
+### Template library
+
+`n8n-templates/` contains JSON workflow exports organised by category:
+
+| Directory | Contents |
+|---|---|
+| `crm/` | HubSpot contact creation from forms and bookings |
+| `accounting/` | Xero invoice triggers |
+| `scheduling/` | Appointment reminders and booking confirmations |
+| `notifications/` | Slack and email alerting |
+| `allied-health/` | Workflows specific to allied health practices |
+
+When onboarding a new n8n client:
+1. Create their Project in n8n
+2. Import relevant template JSONs
+3. Reconnect credentials inside the Project
+4. Adapt message copy, schedules, thresholds
+5. Activate
+
+Full instructions: `n8n-templates/README.md`
+
+### Client records
+
+Every client (both AI agent and n8n) has a directory under `clients/[slug]/`:
+- `discovery.md` — notes from the initial discovery call
+- `workflows.md` — active automations, platform, last updated date
+
+See `clients/README.md` for the full convention.
