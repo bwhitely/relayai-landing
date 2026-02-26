@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     admin_api_key: str
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
+    twilio_from_number: str = ""  # E.164 format, used for owner SMS notifications
     fernet_key: str = ""
     default_model: str = "claude-sonnet-4-5-20250929"
     max_agent_iterations: int = 5

@@ -144,6 +144,36 @@ async def _escalate_to_human_handler(tool_input: dict, tenant: Tenant) -> dict:
             logger.error("Email escalation failed: %s", e)
             errors.append(f"email: {e}")
 
+    # Send SMS notification to owner if configured
+    owner_sms = config.get("owner_sms")
+    if owner_sms:
+        try:
+            from app.config import get_settings
+            from app.integrations.twilio import send_sms_message
+            settings = get_settings()
+            from_number = settings.twilio_from_number
+            if from_number:
+                sms_body = (
+                    f"RelayAI lead alert\n"
+                    f"Business: {tenant.name}\n"
+                    f"Reason: {reason}"
+                )
+                if summary:
+                    sms_body += f"\nSummary: {summary[:120]}"
+                await send_sms_message(
+                    to=owner_sms,
+                    body=sms_body,
+                    from_number=from_number,
+                )
+                notified_channels.append("sms")
+            else:
+                logger.warning(
+                    "owner_sms configured but TWILIO_FROM_NUMBER not set in environment"
+                )
+        except Exception as e:
+            logger.error("SMS escalation failed: %s", e)
+            errors.append(f"sms: {e}")
+
     result: dict = {
         "status": "escalated",
         "message": "A human team member has been notified and will follow up shortly.",
