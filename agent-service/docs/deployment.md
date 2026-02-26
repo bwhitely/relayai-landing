@@ -369,3 +369,58 @@ Before going live with real clients:
 - [ ] Admin API key stored securely (password manager, not plaintext)
 - [ ] Landing page demo config updated with production URL
 - [ ] `LOG_LEVEL` set to `INFO` (not `DEBUG`)
+
+---
+
+## n8n Deployment (Workflow Automation Track)
+
+n8n runs as a separate Railway service alongside the agent service.
+Access it at: https://n8n.relayai.com.au (admin credentials in password manager — clients never access this directly).
+
+### Railway service: `n8n`
+### Database: `n8n-db` (separate Postgres — do not share with agent-db)
+
+### Environment variables
+
+| Variable | Notes |
+|---|---|
+| `N8N_BASIC_AUTH_ACTIVE` | `true` |
+| `N8N_BASIC_AUTH_USER` | `admin` |
+| `N8N_BASIC_AUTH_PASSWORD` | In password manager |
+| `N8N_ENCRYPTION_KEY` | In password manager — see warning below |
+| `WEBHOOK_URL` | `https://n8n.relayai.com.au` |
+| `N8N_RUNNERS_ENABLED` | `true` |
+| `DB_TYPE` | `postgresdb` |
+| `DB_POSTGRESDB_HOST` | Internal hostname from n8n-db Railway service |
+| `DB_POSTGRESDB_PORT` | `5432` |
+| `DB_POSTGRESDB_DATABASE` | `railway` |
+| `DB_POSTGRESDB_USER` | `postgres` |
+| `DB_POSTGRESDB_PASSWORD` | From n8n-db Railway service variables |
+| `GENERIC_TIMEZONE` | `Australia/Adelaide` |
+| `N8N_DEFAULT_LOCALE` | `en` |
+
+### ⚠️ Critical: N8N_ENCRYPTION_KEY
+
+n8n uses this key to encrypt all stored credentials (OAuth tokens, API keys, passwords).
+If you lose or rotate it without a migration plan, all stored credentials across all client Projects become unrecoverable — you will need to manually reconnect every integration for every client.
+
+- Store it in a password manager immediately after generation
+- Never auto-rotate it
+- If it ever needs to change, export all credentials first and plan a migration window
+
+Generate with: `python3 -c "import secrets; print(secrets.token_hex(32))"`
+
+### Upgrading n8n
+
+Railway deploys `n8nio/n8n:latest` by default. For production stability, pin to a specific version:
+
+1. In the n8n Railway service → Settings → Source → change image to `n8nio/n8n:1.x.x`
+2. Always check the [n8n changelog](https://github.com/n8n-io/n8n/releases) before upgrading — breaking changes occur between minor versions
+3. Test in `RelayAI Internal` project before upgrading if clients have active workflows
+
+### Setting up the domain
+
+1. In the n8n Railway service → Settings → Networking → Custom Domain
+2. Add `n8n.relayai.com.au`
+3. Add the CNAME record your DNS provider pointing to the Railway-generated hostname
+4. SSL provisions automatically (usually < 5 minutes)
