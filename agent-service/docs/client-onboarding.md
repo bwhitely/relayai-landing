@@ -47,8 +47,8 @@ RelayAI delivers automation via two tracks. Choose based on what the client need
 For clients who need workflow automation without a conversational agent.
 
 - [ ] Discovery call complete — identify which `n8n-templates/` templates apply
-- [ ] Create n8n Project: `Client — [Business Name]` at https://n8n.relayai.com.au (admin login — credentials in password manager)
-- [ ] Import relevant template JSONs into the Project (see `n8n-templates/README.md`)
+- [ ] Create a tag for the client in n8n: `[client-slug]` (e.g. `acme-physio`) at https://n8n.relayai.com.au (admin login — credentials in password manager)
+- [ ] Import relevant template JSONs from `n8n-templates/` (see `n8n-templates/README.md`), apply the client tag immediately after import
 - [ ] Configure credentials inside the Project (Xero OAuth, HubSpot key, email, Slack, etc.)
 - [ ] Adapt workflow logic: message copy, email addresses, thresholds, cron schedules
 - [ ] Test end-to-end with real data using n8n manual trigger

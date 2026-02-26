@@ -350,11 +350,17 @@ For clients who need tool-to-tool automation without a conversational AI agent, 
 |---|---|
 | Client wants WhatsApp / SMS / web chat bot | AI Agent service |
 | Client wants tool-to-tool automation, no conversation | n8n |
-| Client needs both | Both — agent service tenant + n8n project, independently configured |
+| Client needs both | Both — agent service tenant + n8n workflows (tagged), independently configured |
 
 ### Client isolation
 
-Each client has their own n8n **Project** named `Client — [Business Name]`. Credentials configured inside a Project are not visible to other Projects. All Projects live on the shared n8n instance.
+n8n Projects is enterprise-only on self-hosted instances. Workflows are organised using tags and naming conventions instead — no hard namespace separation is needed since only the RelayAI operator logs into n8n.
+
+- **Tags:** one per client slug (e.g. `acme-physio`, `relayai-internal`)
+- **Workflow names:** `[Client] — [Category] — [Trigger] → [Action]`
+- **Credential names:** `[Client] — [Integration]` (e.g. `Acme Physio — Xero OAuth`)
+
+Filter by tag in the n8n dashboard to see all workflows for a given client.
 
 ### Template library
 
@@ -369,9 +375,9 @@ Each client has their own n8n **Project** named `Client — [Business Name]`. Cr
 | `allied-health/` | Workflows specific to allied health practices |
 
 When onboarding a new n8n client:
-1. Create their Project in n8n
-2. Import relevant template JSONs
-3. Reconnect credentials inside the Project
+1. Create a tag for the client slug in n8n
+2. Import relevant template JSONs, apply the tag immediately
+3. Reconnect credentials using the `[Client] — [Integration]` naming convention
 4. Adapt message copy, schedules, thresholds
 5. Activate
 

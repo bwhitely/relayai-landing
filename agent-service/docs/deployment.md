@@ -399,10 +399,14 @@ Access it at: https://n8n.relayai.com.au (admin credentials in password manager 
 | `GENERIC_TIMEZONE` | `Australia/Adelaide` |
 | `N8N_DEFAULT_LOCALE` | `en` |
 
+### Client isolation
+
+n8n Projects is an enterprise-only feature on self-hosted instances. Client workflows are organised using **tags and naming conventions** instead. See `n8n-templates/README.md` for the full convention.
+
 ### ⚠️ Critical: N8N_ENCRYPTION_KEY
 
 n8n uses this key to encrypt all stored credentials (OAuth tokens, API keys, passwords).
-If you lose or rotate it without a migration plan, all stored credentials across all client Projects become unrecoverable — you will need to manually reconnect every integration for every client.
+If you lose or rotate it without a migration plan, all stored credentials across all client workflows become unrecoverable — you will need to manually reconnect every integration for every client.
 
 - Store it in a password manager immediately after generation
 - Never auto-rotate it
@@ -416,7 +420,7 @@ Railway deploys `n8nio/n8n:latest` by default. For production stability, pin to 
 
 1. In the n8n Railway service → Settings → Source → change image to `n8nio/n8n:1.x.x`
 2. Always check the [n8n changelog](https://github.com/n8n-io/n8n/releases) before upgrading — breaking changes occur between minor versions
-3. Test in `RelayAI Internal` project before upgrading if clients have active workflows
+3. Test with a canary workflow before upgrading if clients have active workflows
 
 ### Setting up the domain
 
