@@ -25,6 +25,8 @@ Each file is a JSON export that can be imported directly into n8n.
 
 ## Template index
 
+> **Note:** The templates listed below are planned. JSON files will be added as they are built and tested in n8n. See "Exporting a workflow as a template" below for how to contribute new templates.
+
 | Template | Trigger | Action | Vertical |
 |---|---|---|---|
 | `crm/form-to-hubspot.json` | Webhook (web form POST) | Create HubSpot contact | All |
@@ -46,7 +48,7 @@ Each file is a JSON export that can be imported directly into n8n.
 4. Open the JSON and replace any real client data (email addresses, phone numbers, business names, API endpoint URLs) with obvious placeholders like `YOUR_EMAIL_HERE`, `YOUR_XERO_ACCOUNT_ID`, etc.
 5. Commit with message: `feat(n8n): add [workflow name] template`
 
-> **Note on credentials:** When a credential node appears in an exported workflow, n8n replaces the actual secret with a reference ID. On import into a new instance, n8n will prompt you to reconnect — this is expected. You do not need to manually redact credentials from the JSON export.
+> **Note on credentials:** n8n strips credential secrets automatically on export — you do not need to redact API keys or tokens from the JSON. However, step 4 still applies: business-specific values embedded in node configuration (email addresses, phone numbers, webhook URLs, account IDs) are **not** stripped automatically and must be replaced with placeholders manually before committing.
 
 ## Client isolation
 
@@ -66,3 +68,4 @@ Examples:
 ## n8n instance
 
 Production: https://n8n.relayai.com.au (admin credentials in password manager — clients never access this directly)
+Version: n8n v1.x (self-hosted) — requires Projects feature, available from n8n v1.10+
