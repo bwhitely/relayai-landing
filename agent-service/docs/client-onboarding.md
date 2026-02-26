@@ -26,6 +26,40 @@ If you've done this before and just need the steps:
 
 ---
 
+## Delivery Tracks
+
+RelayAI delivers automation via two tracks. Choose based on what the client needs.
+
+| Track | When to use | Delivery time |
+|---|---|---|
+| **AI Agent** (this doc) | Client needs conversational automation — WhatsApp bot, lead qualification, appointment booking via chat, 24/7 customer response | 1–2 weeks |
+| **n8n Workflow** (see checklist below) | Client needs tool-to-tool automation — Xero triggers, form → CRM, appointment reminders, Slack notifications. No conversation required. | 30–60 min per workflow |
+
+**Decision guide:**
+- "Can it reply to WhatsApp messages from customers?" → AI Agent
+- "Can it automatically send an invoice reminder when Xero marks it overdue?" → n8n
+- Client needs both → both tracks, independently configured
+
+---
+
+## n8n Track: Onboarding Checklist
+
+For clients who need workflow automation without a conversational agent.
+
+- [ ] Discovery call complete — identify which `n8n-templates/` templates apply
+- [ ] Create n8n Project: `Client — [Business Name]` at https://n8n.relayai.com.au
+- [ ] Import relevant template JSONs into the Project (see `n8n-templates/README.md`)
+- [ ] Configure credentials inside the Project (Xero OAuth, HubSpot key, email, Slack, etc.)
+- [ ] Adapt workflow logic: message copy, email addresses, thresholds, cron schedules
+- [ ] Test end-to-end with real data using n8n manual trigger
+- [ ] Activate workflows
+- [ ] Create `clients/[client-slug]/workflows.md` documenting what is running and when it was last updated
+- [ ] Follow up with client after one week — workflows running as expected?
+
+For template import/export instructions, see [`n8n-templates/README.md`](../../n8n-templates/README.md) at the repo root.
+
+---
+
 ## Complete Worked Example: Minimal Tenant
 
 Here's a complete example creating a simple tenant with just HubSpot CRM and email escalation. This is the fastest way to get a client running.
