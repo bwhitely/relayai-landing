@@ -4,9 +4,9 @@ Step-by-step process for onboarding a new client onto the RelayAI platform.
 
 ---
 
-## Quick-Start Checklist
+## Quick-Start Checklist (AI Agent Track)
 
-If you've done this before and just need the steps:
+If you've done this before and just need the steps for the AI Agent track:
 
 - [ ] Discovery call completed — know which integrations they need
 - [ ] Create tenant via API (name, system_prompt, tools_config at minimum)
@@ -47,7 +47,7 @@ RelayAI delivers automation via two tracks. Choose based on what the client need
 For clients who need workflow automation without a conversational agent.
 
 - [ ] Discovery call complete — identify which `n8n-templates/` templates apply
-- [ ] Create n8n Project: `Client — [Business Name]` at https://n8n.relayai.com.au
+- [ ] Create n8n Project: `Client — [Business Name]` at https://n8n.relayai.com.au (admin login — credentials in password manager)
 - [ ] Import relevant template JSONs into the Project (see `n8n-templates/README.md`)
 - [ ] Configure credentials inside the Project (Xero OAuth, HubSpot key, email, Slack, etc.)
 - [ ] Adapt workflow logic: message copy, email addresses, thresholds, cron schedules
