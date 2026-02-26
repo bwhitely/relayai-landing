@@ -248,10 +248,9 @@ async def _create_lead_handler(tool_input: dict, tenant: Tenant) -> dict:
             "email": tool_input.get("email", ""),
             "phone": tool_input.get("phone", ""),
             "company": tool_input.get("company", ""),
+            "message": tool_input.get("notes", ""),
             "hs_lead_status": tool_input.get("lead_status", "NEW"),
         }
-        # Note: 'notes' is not a default HubSpot contact property, so we skip it.
-        # Notes are preserved in the conversation history.
         # Remove empty values (but keep hs_lead_status)
         properties = {k: v for k, v in properties.items() if v}
         return await create_contact(properties, api_key)
