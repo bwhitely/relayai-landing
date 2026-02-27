@@ -1,0 +1,129 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0ADJA50ZPY",
+          "mode": "list",
+          "cachedResultName": "general"
+        },
+        "text": "=New RelayAI Enquiry\nName: {{ $json.body.name }}\nEmail: {{  $json.body.email }}\nMessage: {{ $json.body.message }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        384,
+        0
+      ],
+      "id": "ee660b29-49e8-408e-af18-99be9624f092",
+      "name": "Send a message",
+      "webhookId": "c945e2b8-9641-42b5-ac82-84020e02c1ae",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "e0vX47tkZs3nbOno",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "relayai-contact-form",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b11b8690-9479-4b7e-9d64-11e893f8925c",
+      "name": "relayai-contact-form",
+      "webhookId": "854a7e3c-fb65-491d-ada9-3c5be0b79644"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"from\": \"ben@relayai.com.au\",\n  \"to\": \"ben@relayai.com.au\",\n  \"subject\": \"New RelayAI enquiry - {{ $json.body.name }}\",\n  \"text\": \"Name: {{ $json.body.name }}\\nEmail: {{$json.body.email }}\\nMessage: {{ $json.body.message }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "97728398-452d-4745-b48e-2a045f295cc7",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "g6jLuvAvGAdEbXTJ",
+          "name": "Bearer Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "relayai-contact-form": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "availableInMCP": false
+  },
+  "versionId": "794b3348-0d6a-4392-a31f-6e11406ffbd8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "484eaecde504156c9062d6c5b4f04867412d635b705d2e29ab08be6b0711ee2e"
+  },
+  "id": "cdM6LbMbbijCUYEO",
+  "tags": [
+    {
+      "name": "relayai-internal",
+      "id": "uEIFmkNlex3BIhLj",
+      "updatedAt": "2026-02-26T22:22:46.600Z",
+      "createdAt": "2026-02-26T22:22:46.600Z"
+    }
+  ]
+}

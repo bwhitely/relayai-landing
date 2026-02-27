@@ -653,10 +653,18 @@
     }
 
     @media (max-width: 600px) {
+      .hero-image {
+        margin-top: 2rem;
+      }
+
+      .terminal-window {
+        width: 100%;
+      }
+
       .terminal-body {
         font-size: 0.7rem;
         padding: 1rem 1rem 1.25rem;
-        height: 444px; /* 20 lines × (0.7rem × 1.8) + padding */
+        height: 444px; /* 19 compact lines × (0.7rem × 1.8) + padding */
       }
     }
 
@@ -1274,6 +1282,291 @@
       color: var(--text);
     }
 
+    /* ---- DEMO TABS ---- */
+    .demo-tab-bar {
+      display: flex;
+      gap: 0.4rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.3rem;
+      max-width: 380px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .demo-tab-btn {
+      flex: 1;
+      padding: 0.55rem 1rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .demo-tab-btn.active {
+      background: var(--bg-card);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    .demo-tab-content {
+      display: none;
+    }
+
+    .demo-tab-content.active {
+      display: block;
+    }
+
+    /* Mobile panel sub-tabs */
+    .demo-panel-tabs {
+      display: none;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .demo-panel-tab {
+      flex: 1;
+      padding: 0.5rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .demo-panel-tab.active {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    @media (max-width: 767px) {
+      .demo-panel-tabs {
+        display: flex;
+      }
+
+      #demo-activity-panel {
+        display: none;
+      }
+
+      #demo-activity-panel.panel-active {
+        display: flex;
+      }
+
+      #demo-chat-panel.panel-hidden {
+        display: none;
+      }
+
+      .demo-panel {
+        min-height: 360px;
+        max-height: 420px;
+      }
+
+      .demo-starters {
+        gap: 0.4rem;
+      }
+
+      .demo-starter-btn {
+        font-size: 0.78rem;
+        padding: 0.4rem 0.75rem;
+      }
+    }
+
+    /* ---- WORKFLOW ANIMATION PANEL ---- */
+    .demo-workflow-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 720px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    .demo-wf-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .demo-wf-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .demo-wf-title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+    }
+
+    .demo-wf-label {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(212, 149, 42, 0.1);
+      border: 1px solid rgba(212, 149, 42, 0.2);
+      border-radius: 4px;
+      padding: 0.18rem 0.55rem;
+    }
+
+    .demo-wf-body {
+      padding: 1.5rem;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .demo-wf-trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.85rem 1rem;
+      background: rgba(212, 149, 42, 0.08);
+      border: 1px solid rgba(212, 149, 42, 0.2);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .demo-wf-trigger.wf-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .demo-wf-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.35s ease, transform 0.35s ease, border-color 0.3s ease;
+    }
+
+    .demo-wf-step.wf-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .demo-wf-step.wf-resolved {
+      border-color: rgba(74, 222, 128, 0.3);
+    }
+
+    .demo-wf-step-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .demo-wf-step-body {
+      flex: 1;
+    }
+
+    .demo-wf-step-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .demo-wf-step-detail {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .demo-wf-step-check {
+      color: #4ade80;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      margin-top: 2px;
+    }
+
+    .demo-wf-step.wf-resolved .demo-wf-step-check {
+      opacity: 1;
+    }
+
+    .demo-wf-outcome {
+      margin-top: 0.25rem;
+      padding: 0.85rem 1rem;
+      background: rgba(74, 222, 128, 0.05);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #4ade80;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .demo-wf-outcome.wf-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .demo-wf-dots {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      padding: 1rem 0 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .demo-wf-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .demo-wf-dot.wf-dot-active {
+      background: var(--accent);
+    }
+
+    /* ---- CARD EXAMPLES ---- */
+    .card-example {
+      font-size: 0.82rem;
+      color: rgba(154, 152, 152, 0.75);
+      line-height: 1.55;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      font-style: italic;
+    }
+
     /* ---- HOW IT WORKS ---- */
     #how-it-works {
       border-top: 1px solid var(--border);
@@ -1425,12 +1718,26 @@
 
     .industry {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
+      gap: 0.6rem;
       padding: 1rem 1.25rem;
       background: var(--bg-elevated);
       border-radius: 8px;
       border: 1px solid var(--border);
+    }
+
+    .industry-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .industry-pain {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      padding-left: 1.375rem;
+      opacity: 0.8;
     }
 
     .industry-marker {
@@ -2405,50 +2712,87 @@
       <div class="container">
         <div class="demo-header">
           <p class="section-label">See It In Action</p>
-          <h2 class="section-heading">One example: an AI agent handling customer enquiries.</h2>
-          <p class="section-sub" style="margin: 0 auto;">AI agents are just one type of automation we build. Try this one &mdash; send a message and watch it look for user details in a CRM, check availability, and book appointments in real time.</p>
+          <h2 class="section-heading">Two ways to automate your business.</h2>
+          <p class="section-sub" style="margin: 0 auto;">AI agents that have real conversations with customers, or background workflows that run on triggers and schedules &mdash; often both.</p>
         </div>
-        <div class="demo-split">
-          <!-- Chat Panel -->
-          <div class="demo-panel">
-            <div class="demo-panel-header">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Customer View
-            </div>
-            <div class="demo-chat-messages" id="demo-messages">
-              <div class="demo-msg agent">Hi! I'm the AI assistant for Adelaide Wellness Clinic. I can help with bookings, availability, or answer questions. How can I help?</div>
-              <div class="demo-typing" id="demo-typing">
-                <div class="demo-typing-dot"></div>
-                <div class="demo-typing-dot"></div>
-                <div class="demo-typing-dot"></div>
+
+        <!-- Top-level tab bar -->
+        <div class="demo-tab-bar">
+          <button class="demo-tab-btn active" data-demo-tab="agent">AI Agent Chat</button>
+          <button class="demo-tab-btn" data-demo-tab="workflow">Background Workflows</button>
+        </div>
+
+        <!-- AI Agent tab -->
+        <div class="demo-tab-content active" id="demo-tab-agent">
+          <!-- Mobile sub-tabs: switch between chat and activity panels -->
+          <div class="demo-panel-tabs">
+            <button class="demo-panel-tab active" data-panel="chat">Customer View</button>
+            <button class="demo-panel-tab" data-panel="activity">Under the Hood</button>
+          </div>
+          <div class="demo-split">
+            <!-- Chat Panel -->
+            <div class="demo-panel" id="demo-chat-panel">
+              <div class="demo-panel-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Customer View
+              </div>
+              <div class="demo-chat-messages" id="demo-messages">
+                <div class="demo-msg agent">Hi! I'm the AI assistant for Adelaide Wellness Clinic. I can help with bookings, availability, or answer questions. How can I help?</div>
+                <div class="demo-typing" id="demo-typing">
+                  <div class="demo-typing-dot"></div>
+                  <div class="demo-typing-dot"></div>
+                  <div class="demo-typing-dot"></div>
+                </div>
+              </div>
+              <div class="demo-chat-input">
+                <input type="text" id="demo-input" placeholder="Type a message..." autocomplete="off">
+                <button id="demo-send">Send</button>
               </div>
             </div>
-            <div class="demo-chat-input">
-              <input type="text" id="demo-input" placeholder="Type a message..." autocomplete="off">
-              <button id="demo-send">Send</button>
-            </div>
-          </div>
-          <!-- Activity Feed Panel -->
-          <div class="demo-panel">
-            <div class="demo-panel-header">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              Behind the Scenes
-            </div>
-            <div class="demo-feed" id="demo-feed">
-              <div class="demo-feed-empty" id="demo-feed-empty">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                Agent actions will appear here as you chat
+            <!-- Activity Feed Panel -->
+            <div class="demo-panel" id="demo-activity-panel">
+              <div class="demo-panel-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Behind the Scenes
+              </div>
+              <div class="demo-feed" id="demo-feed">
+                <div class="demo-feed-empty" id="demo-feed-empty">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                  Agent actions will appear here as you chat
+                </div>
               </div>
             </div>
           </div>
+          <div class="demo-starters">
+            <span>Try asking:</span>
+            <button class="demo-starter-btn" onclick="sendDemoMessage('I\'d like to book an appointment')">Book an appointment</button>
+            <button class="demo-starter-btn" onclick="sendDemoMessage('Do you have availability this week?')">Check availability</button>
+            <button class="demo-starter-btn" onclick="sendDemoMessage('I need to speak to someone')">Speak to someone</button>
+          </div>
+          <button class="demo-reset" onclick="resetDemo()">Reset conversation</button>
         </div>
-        <div class="demo-starters">
-          <span>Try asking:</span>
-          <button class="demo-starter-btn" onclick="sendDemoMessage('I\'d like to book an appointment')">Book an appointment</button>
-          <button class="demo-starter-btn" onclick="sendDemoMessage('Do you have availability this week?')">Check availability</button>
-          <button class="demo-starter-btn" onclick="sendDemoMessage('I need to speak to someone')">Speak to someone</button>
+
+        <!-- Background Workflows tab -->
+        <div class="demo-tab-content" id="demo-tab-workflow">
+          <div class="demo-workflow-panel">
+            <div class="demo-wf-header">
+              <div class="demo-wf-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Automation Engine
+              </div>
+              <span class="demo-wf-label" id="demo-wf-label">Running</span>
+            </div>
+            <div class="demo-wf-body" id="demo-wf-body">
+              <!-- filled by workflow animation JS -->
+            </div>
+            <div class="demo-wf-dots" id="demo-wf-dots">
+              <div class="demo-wf-dot wf-dot-active"></div>
+              <div class="demo-wf-dot"></div>
+              <div class="demo-wf-dot"></div>
+            </div>
+          </div>
         </div>
-        <button class="demo-reset" onclick="resetDemo()">Reset conversation</button>
+
       </div>
     </section>
 
@@ -2514,26 +2858,31 @@
           <div class="card reveal reveal-d1">
             <h3>Connect Your Systems</h3>
             <p>Sync your CRM, calendar, accounting, and comms tools so data flows between them automatically instead of being copied by hand.</p>
+            <p class="card-example">E.g., a new Xero invoice automatically creates a follow-up task in HubSpot and updates the client's record in your spreadsheet.</p>
           </div>
 
           <div class="card reveal reveal-d2">
             <h3>Eliminate Manual Data Entry</h3>
             <p>Auto-populate forms, records, and reports from the data you already have &mdash; no more re-typing the same information across three different systems.</p>
+            <p class="card-example">E.g., a completed Calendly booking flows straight into your CRM, calendar, and accounting system &mdash; no copy-paste, no lag.</p>
           </div>
 
           <div class="card reveal reveal-d3">
             <h3>Streamline Repetitive Workflows</h3>
             <p>Turn multi-step manual processes into automated flows &mdash; approvals, follow-ups, notifications, and handoffs that run without you.</p>
+            <p class="card-example">E.g., an overdue invoice triggers a reminder email, a Slack alert to the owner, and a CRM status update &mdash; all automatically.</p>
           </div>
 
           <div class="card reveal reveal-d4">
             <h3>Keep Humans in Control</h3>
             <p>Escalation, approvals, and dashboards so you always know what's happening and can step in when a human touch is needed.</p>
+            <p class="card-example">E.g., complex enquiries are flagged to your team via Slack with full conversation context &mdash; no dropped balls, no missed handoffs.</p>
           </div>
 
           <div class="card reveal reveal-d5">
-            <h3>Custom-Built For You</h3>
-            <p>Every solution matches how your business actually works. No off-the-shelf templates &mdash; we build around your processes, your tools, your rules.</p>
+            <h3>Allied Health Automation</h3>
+            <p>Appointment reminders, rebooking flows, NDIS document routing, and overdue invoice follow-up &mdash; purpose-built for Splose-based practices.</p>
+            <p class="card-example">E.g., SMS reminders sent 24h before each appointment. No-shows trigger an automatic rebooking prompt. Overdue invoices chase themselves.</p>
           </div>
 
         </div>
@@ -2548,20 +2897,32 @@
         <p class="section-sub">If manual work and disconnected systems are pulling you away from the work that actually grows your business, we can help.</p>
         <div class="industries">
           <div class="industry">
-            <div class="industry-marker"></div>
-            <div><span>Tradies &amp; Home Services</span> &mdash; <em>Plumbers, electricians, builders</em></div>
+            <div class="industry-header">
+              <div class="industry-marker"></div>
+              <div><span>Tradies &amp; Home Services</span> &mdash; <em>Plumbers, electricians, builders</em></div>
+            </div>
+            <p class="industry-pain">After-hours enquiries, job quoting, and invoice follow-up &mdash; handled automatically so you can focus on the work, not the admin.</p>
           </div>
           <div class="industry">
-            <div class="industry-marker"></div>
-            <div><span>Real Estate</span> &mdash; <em>Agents, property managers, rental enquiries</em></div>
+            <div class="industry-header">
+              <div class="industry-marker"></div>
+              <div><span>Real Estate</span> &mdash; <em>Agents, property managers, rental enquiries</em></div>
+            </div>
+            <p class="industry-pain">Rental applications, maintenance requests, viewing bookings, and tenant follow-ups managed 24/7 &mdash; without extra headcount.</p>
           </div>
           <div class="industry">
-            <div class="industry-marker"></div>
-            <div><span>Clinics &amp; Health</span> &mdash; <em>Physio, dental, allied health, vets</em></div>
+            <div class="industry-header">
+              <div class="industry-marker"></div>
+              <div><span>Clinics &amp; Health</span> &mdash; <em>Physio, dental, allied health, vets</em></div>
+            </div>
+            <p class="industry-pain">Appointment reminders, rebooking flows, NDIS admin, and overdue invoice follow-up &mdash; Splose-connected and running on autopilot.</p>
           </div>
           <div class="industry">
-            <div class="industry-marker"></div>
-            <div><span>Professional Services</span> &mdash; <em>Accountants, lawyers, consultants</em></div>
+            <div class="industry-header">
+              <div class="industry-marker"></div>
+              <div><span>Professional Services</span> &mdash; <em>Accountants, lawyers, consultants</em></div>
+            </div>
+            <p class="industry-pain">Client intake, document collection, billing follow-up, and meeting scheduling &mdash; automated so you bill time, not admin hours.</p>
           </div>
         </div>
       </div>
@@ -3365,6 +3726,225 @@
       });
     })();
 
+    // ---- DEMO TAB SWITCHING ----
+    (function () {
+      var topTabs = document.querySelectorAll('.demo-tab-btn');
+      var topContents = document.querySelectorAll('.demo-tab-content');
+
+      topTabs.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var target = btn.getAttribute('data-demo-tab');
+          topTabs.forEach(function (b) { b.classList.remove('active'); });
+          topContents.forEach(function (c) { c.classList.remove('active'); });
+          btn.classList.add('active');
+          document.getElementById('demo-tab-' + target).classList.add('active');
+          if (target === 'workflow') {
+            if (window.startWorkflowDemo) window.startWorkflowDemo();
+          } else {
+            if (window.stopWorkflowDemo) window.stopWorkflowDemo();
+          }
+        });
+      });
+
+      // Mobile panel sub-tabs
+      var panelTabs = document.querySelectorAll('.demo-panel-tab');
+      panelTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          var target = tab.getAttribute('data-panel');
+          panelTabs.forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          var chatPanel = document.getElementById('demo-chat-panel');
+          var activityPanel = document.getElementById('demo-activity-panel');
+          if (target === 'chat') {
+            chatPanel.classList.remove('panel-hidden');
+            activityPanel.classList.remove('panel-active');
+          } else {
+            chatPanel.classList.add('panel-hidden');
+            activityPanel.classList.add('panel-active');
+          }
+        });
+      });
+    })();
+
+    // ---- WORKFLOW ANIMATION ----
+    (function () {
+      var scenarios = [
+        {
+          label: 'Overdue invoice follow-up',
+          trigger: { icon: '\u23F0', text: 'Scheduled \u00b7 Daily \u00b7 08:00 ACST' },
+          steps: [
+            { icon: '\uD83D\uDCB0', label: 'Check Xero for overdue invoices', detail: '2 invoices overdue >14 days \u2014 $4,200 outstanding' },
+            { icon: '\uD83D\uDCE7', label: 'Send payment reminder emails', detail: 'Reminder emails dispatched \u00d7 2' },
+            { icon: '\uD83D\uDCCB', label: 'Update CRM records', detail: '2 contacts \u2192 status: awaiting payment' },
+          ],
+          outcome: '\u2713 $4,200 chased automatically. Zero manual work.',
+        },
+        {
+          label: 'New website enquiry',
+          trigger: { icon: '\uD83D\uDCEC', text: 'Webhook \u00b7 Form submission \u00b7 Website' },
+          steps: [
+            { icon: '\uD83D\uDCCB', label: 'Create CRM contact', detail: 'James R. added to HubSpot \u2014 source: web' },
+            { icon: '\uD83D\uDCE7', label: 'Send welcome email', detail: 'Welcome email dispatched to james@...' },
+            { icon: '\uD83D\uDD14', label: 'Alert sales team', detail: 'Slack notification sent \u2014 lead assigned to queue' },
+          ],
+          outcome: '\u2713 Lead responded to in <2 seconds. No one lifted a finger.',
+        },
+        {
+          label: 'Appointment reminder flow',
+          trigger: { icon: '\u23F0', text: 'Scheduled \u00b7 Daily \u00b7 09:00 ACST' },
+          steps: [
+            { icon: '\uD83D\uDCC5', label: 'Fetch appointments from Splose', detail: 'Splose: 8 appointments tomorrow \u2014 patients retrieved' },
+            { icon: '\uD83D\uDCAC', label: 'Send SMS reminders', detail: 'Reminder messages sent \u00d7 8 \u2014 reply YES to confirm' },
+            { icon: '\uD83D\uDCCB', label: 'Log responses', detail: '3 confirmed \u00b7 1 rescheduled \u00b7 4 awaiting reply' },
+          ],
+          outcome: '\u2713 8 patients reminded. No phone calls. No staff time.',
+        },
+      ];
+
+      var currentScenario = 0;
+      var wfTimers = [];
+
+      function clearWfTimers() {
+        wfTimers.forEach(clearTimeout);
+        wfTimers = [];
+      }
+
+      function clearBody(el) {
+        while (el.firstChild) { el.removeChild(el.firstChild); }
+      }
+
+      function runWorkflowScenario(idx) {
+        clearWfTimers();
+        var scenario = scenarios[idx % scenarios.length];
+        var body = document.getElementById('demo-wf-body');
+        var dotsEl = document.getElementById('demo-wf-dots');
+        var labelEl = document.getElementById('demo-wf-label');
+        if (!body) return;
+
+        // Update dots
+        if (dotsEl) {
+          var dots = dotsEl.querySelectorAll('.demo-wf-dot');
+          dots.forEach(function (d, i) {
+            d.classList.toggle('wf-dot-active', i === (idx % scenarios.length));
+          });
+        }
+
+        if (labelEl) labelEl.textContent = scenario.label;
+        clearBody(body);
+
+        // Trigger element
+        var triggerEl = document.createElement('div');
+        triggerEl.className = 'demo-wf-trigger';
+
+        var trigIcon = document.createElement('span');
+        trigIcon.textContent = scenario.trigger.icon;
+        trigIcon.style.cssText = 'font-size:1.1rem;flex-shrink:0';
+
+        var trigText = document.createElement('span');
+        trigText.textContent = scenario.trigger.text;
+        trigText.style.cssText = 'font-size:0.88rem;font-weight:600';
+
+        triggerEl.appendChild(trigIcon);
+        triggerEl.appendChild(trigText);
+        body.appendChild(triggerEl);
+
+        var STEP_DELAY = 900;
+        var RESOLVE_DELAY = 600;
+        var t = 300;
+
+        wfTimers.push(setTimeout(function () {
+          triggerEl.classList.add('wf-visible');
+        }, t));
+        t += 500;
+
+        // Build and animate each step
+        scenario.steps.forEach(function (stepData, i) {
+          (function (sd, delay) {
+            var stepEl = document.createElement('div');
+            stepEl.className = 'demo-wf-step';
+
+            var iconSpan = document.createElement('span');
+            iconSpan.className = 'demo-wf-step-icon';
+            iconSpan.textContent = sd.icon;
+
+            var stepBody = document.createElement('div');
+            stepBody.className = 'demo-wf-step-body';
+
+            var labelDiv = document.createElement('div');
+            labelDiv.className = 'demo-wf-step-label';
+            labelDiv.textContent = sd.label;
+
+            var detailDiv = document.createElement('div');
+            detailDiv.className = 'demo-wf-step-detail';
+            detailDiv.textContent = sd.detail;
+
+            var checkSpan = document.createElement('span');
+            checkSpan.className = 'demo-wf-step-check';
+            checkSpan.textContent = '\u2713';
+
+            stepBody.appendChild(labelDiv);
+            stepBody.appendChild(detailDiv);
+            stepEl.appendChild(iconSpan);
+            stepEl.appendChild(stepBody);
+            stepEl.appendChild(checkSpan);
+            body.appendChild(stepEl);
+
+            wfTimers.push(setTimeout(function () {
+              stepEl.classList.add('wf-visible');
+            }, delay));
+
+            wfTimers.push(setTimeout(function () {
+              stepEl.classList.add('wf-resolved');
+            }, delay + RESOLVE_DELAY));
+          })(stepData, t + i * STEP_DELAY);
+        });
+
+        t += scenario.steps.length * STEP_DELAY + RESOLVE_DELAY + 200;
+
+        // Outcome
+        wfTimers.push(setTimeout(function () {
+          var outcomeEl = document.createElement('div');
+          outcomeEl.className = 'demo-wf-outcome';
+          outcomeEl.textContent = scenario.outcome;
+          body.appendChild(outcomeEl);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              outcomeEl.classList.add('wf-visible');
+            });
+          });
+        }, t));
+        t += 800;
+
+        // Loop to next scenario
+        wfTimers.push(setTimeout(function () {
+          currentScenario = (idx + 1) % scenarios.length;
+          runWorkflowScenario(currentScenario);
+        }, t + 3000));
+      }
+
+      window.startWorkflowDemo = function () {
+        clearWfTimers();
+        runWorkflowScenario(currentScenario);
+      };
+
+      window.stopWorkflowDemo = function () {
+        clearWfTimers();
+      };
+
+      // Dot navigation
+      var dotsEl = document.getElementById('demo-wf-dots');
+      if (dotsEl) {
+        dotsEl.querySelectorAll('.demo-wf-dot').forEach(function (dot, i) {
+          dot.addEventListener('click', function () {
+            if (document.getElementById('demo-tab-workflow').classList.contains('active')) {
+              currentScenario = i;
+              runWorkflowScenario(currentScenario);
+            }
+          });
+        });
+      }
+    })();
+
     // ---- ROI CALCULATOR ----
     (function () {
       var enquiriesEl = document.getElementById('roi-enquiries');
@@ -3413,11 +3993,12 @@
       var terminal = document.getElementById('heroTerminal');
       if (!terminal) return;
 
-      var D = '\u2500'.repeat(54);
+      var isMobile = window.innerWidth < 600;
+      var D = '\u2500'.repeat(isMobile ? 38 : 54);
       var H = '\u25cf relay.agent \u2014 automation engine';
 
-      // Three rotating scenarios — each plays in full before the next begins
-      var scenarios = [
+      // Three rotating scenarios — desktop (full-width) and mobile (compact ≤38 chars)
+      var scenariosDesktop = [
 
         // Scenario 1: Inbound multi-channel enquiry → appointment booking
         [
@@ -3492,6 +4073,85 @@
         ],
 
       ];
+
+      // Compact scenarios for small mobile screens (all lines ≤38 chars)
+      var scenariosMobile = [
+
+        // Scenario 1: Inbound enquiry → appointment
+        [
+          { t: H,                                      c: 't-header',  d: 0    },
+          { t: '',                                     c: '',          d: 200  },
+          { t: D,                                      c: 't-divider', d: 300  },
+          { t: '',                                     c: '',          d: 400  },
+          { t: '  trigger  inbound \u00b7 WhatsApp',  c: 't-info',    d: 700  },
+          { t: '  matched  \u2192 Your Business',     c: 't-info',    d: 1200 },
+          { t: '  agent    routing request...',        c: 't-info',    d: 1700 },
+          { t: '',                                     c: '',          d: 2000 },
+          { t: '  tool \u203a  search_contacts(sarah)',c: 't-tool',    d: 2200 },
+          { t: '          \u2714 contact #1042 found', c: 't-success', d: 2650 },
+          { t: '  tool \u203a  check_availability',   c: 't-tool',    d: 3150 },
+          { t: '          \u2714 3 slots available',  c: 't-success', d: 3600 },
+          { t: '  tool \u203a  book_appointment',     c: 't-tool',    d: 4100 },
+          { t: '          \u2714 confirmed \u00b7 #A8821', c: 't-success', d: 4550 },
+          { t: '  tool \u203a  send_reply(customer)', c: 't-tool',    d: 5050 },
+          { t: '          \u2714 confirmation sent',  c: 't-success', d: 5500 },
+          { t: '',                                     c: '',          d: 5900 },
+          { t: '  3.1s \u00b7 4 tools \u00b7 0 humans',c: 't-stat',   d: 6100 },
+          { t: '',                                     c: '',          d: 6400 },
+          { t: D,                                      c: 't-divider', d: 6500 },
+        ],
+
+        // Scenario 2: Scheduled finance job
+        [
+          { t: H,                                          c: 't-header',  d: 0    },
+          { t: '',                                         c: '',          d: 200  },
+          { t: D,                                          c: 't-divider', d: 300  },
+          { t: '',                                         c: '',          d: 400  },
+          { t: '  trigger  scheduled \u00b7 08:00 ACST',  c: 't-info',    d: 700  },
+          { t: '  matched  \u2192 Your Business',         c: 't-info',    d: 1200 },
+          { t: '  workflow daily finance job...',          c: 't-info',    d: 1700 },
+          { t: '',                                         c: '',          d: 2000 },
+          { t: '  tool \u203a  search_invoices(xero)',    c: 't-tool',    d: 2200 },
+          { t: '          \u2714 4 invoices \u00b7 $12,840', c: 't-success', d: 2650 },
+          { t: '  tool \u203a  check_payment(>14d)',      c: 't-tool',    d: 3150 },
+          { t: '          \u2714 2 overdue \u00b7 $4,200',c: 't-success', d: 3600 },
+          { t: '  tool \u203a  send_email(reminders\u00d72)', c: 't-tool', d: 4100 },
+          { t: '          \u2714 reminders sent',         c: 't-success', d: 4550 },
+          { t: '  tool \u203a  update_lead(\u00d72)',     c: 't-tool',    d: 5050 },
+          { t: '          \u2714 CRM records updated',    c: 't-success', d: 5500 },
+          { t: '',                                         c: '',          d: 5900 },
+          { t: '  2.4s \u00b7 $4,200 chased auto',       c: 't-stat',    d: 6100 },
+          { t: '',                                         c: '',          d: 6400 },
+          { t: D,                                          c: 't-divider', d: 6500 },
+        ],
+
+        // Scenario 3: Form submission → CRM + lead nurture
+        [
+          { t: H,                                          c: 't-header',  d: 0    },
+          { t: '',                                         c: '',          d: 200  },
+          { t: D,                                          c: 't-divider', d: 300  },
+          { t: '',                                         c: '',          d: 400  },
+          { t: '  trigger  webhook \u00b7 form submit',   c: 't-info',    d: 700  },
+          { t: '  matched  \u2192 Your Business',         c: 't-info',    d: 1200 },
+          { t: '  workflow new lead processing...',        c: 't-info',    d: 1700 },
+          { t: '',                                         c: '',          d: 2000 },
+          { t: '  tool \u203a  create_lead(james r.)',    c: 't-tool',    d: 2200 },
+          { t: '          \u2714 contact #1091 in CRM',  c: 't-success', d: 2650 },
+          { t: '  tool \u203a  send_email(welcome)',      c: 't-tool',    d: 3150 },
+          { t: '          \u2714 welcome email sent',     c: 't-success', d: 3600 },
+          { t: '  tool \u203a  update_lead(score:high)', c: 't-tool',    d: 4100 },
+          { t: '          \u2714 lead prioritised',       c: 't-success', d: 4550 },
+          { t: '  tool \u203a  send_email(sales team)',  c: 't-tool',    d: 5050 },
+          { t: '          \u2714 team alerted',           c: 't-success', d: 5500 },
+          { t: '',                                         c: '',          d: 5900 },
+          { t: '  1.8s \u00b7 lead replied in <2s',      c: 't-stat',    d: 6100 },
+          { t: '',                                         c: '',          d: 6400 },
+          { t: D,                                          c: 't-divider', d: 6500 },
+        ],
+
+      ];
+
+      var scenarios = isMobile ? scenariosMobile : scenariosDesktop;
 
       var scenarioIdx = 0;
       var timers = [];
