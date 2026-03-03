@@ -1736,6 +1736,25 @@
       font-size: 0.9rem;
     }
 
+    .industry-links {
+      display: flex;
+      gap: 1rem;
+      padding-left: 1.375rem;
+      flex-wrap: wrap;
+    }
+
+    .industry-link {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .industry-link:hover {
+      color: var(--accent-hover);
+    }
+
     @media (min-width: 768px) {
       .industries {
         display: grid;
@@ -2879,6 +2898,7 @@
               <div><span>Tradies &amp; Home Services</span> &mdash; <em>Plumbers, electricians, builders</em></div>
             </div>
             <p class="industry-pain">After-hours enquiries, job quoting, and invoice follow-up &mdash; handled automatically so you can focus on the work, not the admin.</p>
+            <div class="industry-links"><a href="/tradies" class="industry-link">See how it works &rarr;</a></div>
           </div>
           <div class="industry">
             <div class="industry-header">
@@ -2886,6 +2906,7 @@
               <div><span>Real Estate</span> &mdash; <em>Agents, property managers, rental enquiries</em></div>
             </div>
             <p class="industry-pain">Rental applications, maintenance requests, viewing bookings, and tenant follow-ups managed 24/7 &mdash; without extra headcount.</p>
+            <div class="industry-links"><a href="/real-estate" class="industry-link">See how it works &rarr;</a></div>
           </div>
           <div class="industry">
             <div class="industry-header">
@@ -2893,6 +2914,7 @@
               <div><span>Clinics &amp; Health</span> &mdash; <em>Physio, dental, allied health, vets</em></div>
             </div>
             <p class="industry-pain">Appointment reminders, rebooking flows, NDIS admin, and overdue invoice follow-up &mdash; Splose-connected and running on autopilot.</p>
+            <div class="industry-links"><a href="/health" class="industry-link">See how it works &rarr;</a></div>
           </div>
           <div class="industry">
             <div class="industry-header">
@@ -2900,6 +2922,10 @@
               <div><span>Professional Services</span> &mdash; <em>Accountants, lawyers, consultants</em></div>
             </div>
             <p class="industry-pain">Client intake, document collection, billing follow-up, and meeting scheduling &mdash; automated so you bill time, not admin hours.</p>
+            <div class="industry-links">
+              <a href="/accounting" class="industry-link">Accounting &amp; advisory &rarr;</a>
+              <a href="/law-firms" class="industry-link">Law firms &rarr;</a>
+            </div>
           </div>
         </div>
       </div>
