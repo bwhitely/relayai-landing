@@ -6,8 +6,8 @@ Use these during the initial discovery call with a prospective client. Take note
 
 ## About the Business
 
-1. What's the name of your business, and what do you do?
-2. Where are you located? Do you serve a specific area?
+1. What's the name of your business, and what do you do? Prosper Wealth
+2. Where are you located? Do you serve a specific area? QLD
 3. How many staff do you have?
 4. What services do you offer, and what are the rough price ranges?
 5. What kind of work are you most looking to automate — is it customer-facing stuff like handling enquiries and bookings,       internal processes like data entry and follow-ups,  
