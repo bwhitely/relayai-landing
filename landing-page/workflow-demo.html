@@ -15,19 +15,30 @@
   <meta property="og:video:width" content="1280">
   <meta property="og:video:height" content="720">
   <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b1320;
-      --card: #111a2b;
-      --text: #ecf2ff;
-      --muted: #9eb0d1;
-      --accent: #24d6a8;
+      --bg: #111113;
+      --bg-elevated: #1a1a1e;
+      --bg-card: #1e1e22;
+      --text: #e8e6e3;
+      --text-muted: #9a9898;
+      --accent: #d4952a;
+      --accent-hover: #e5a83a;
+      --border: #2a2a2e;
+      --font-display: 'General Sans', sans-serif;
+      --font-body: 'Switzer', sans-serif;
     }
-    * { box-sizing: border-box; }
-    body {
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: radial-gradient(1000px 500px at 20% -10%, #173258 0%, var(--bg) 55%);
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: grid;
@@ -36,18 +47,23 @@
     }
     .wrap {
       width: min(980px, 100%);
-      background: var(--card);
-      border: 1px solid #1d2a42;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 14px;
       padding: 22px;
       box-shadow: 0 18px 60px rgba(0,0,0,.35);
     }
-    h1 { margin: 0 0 10px; font-size: 28px; }
-    p { margin: 0 0 16px; color: var(--muted); line-height: 1.5; }
+    h1 {
+      margin-bottom: 10px;
+      font-size: 28px;
+      font-family: var(--font-display);
+      letter-spacing: -0.02em;
+    }
+    p { margin-bottom: 16px; color: var(--text-muted); line-height: 1.5; }
     video {
       width: 100%;
       border-radius: 10px;
-      border: 1px solid #243554;
+      border: 1px solid var(--border);
       background: #000;
     }
     .links {
@@ -57,20 +73,25 @@
       gap: 10px;
     }
     a {
-      color: #04130f;
+      color: #111113;
       background: var(--accent);
       text-decoration: none;
       font-weight: 700;
       padding: 9px 12px;
       border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+    a:hover {
+      background: var(--accent-hover);
     }
     code {
       display: block;
       margin-top: 12px;
       padding: 10px;
       border-radius: 8px;
-      background: #0a1020;
-      color: #b7c7e8;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
       overflow-wrap: anywhere;
       font-size: 13px;
     }
