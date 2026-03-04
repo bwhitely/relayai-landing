@@ -1,0 +1,449 @@
+{
+  "name": "RelayAI Internal - Outreach - Daily Qualified Leads -> Claude -> Draft + Send",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "15 9 * * 1-5"
+            }
+          ]
+        },
+        "timezone": "Australia/Adelaide"
+      },
+      "id": "f66a1c9d-cf09-4ec7-ad5d-b00f82431d25",
+      "name": "Daily Outreach Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1180,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "options": {
+          "returnAll": true,
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRange",
+              "range": "A:Z"
+            }
+          }
+        }
+      },
+      "id": "d8f4c1da-2d9d-4c73-aada-cde5d4776b4f",
+      "name": "Read Leads From Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -960,
+        120
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const isTruthy = (v) => ['true', '1', 'yes', 'y'].includes(String(v ?? '').trim().toLowerCase());\nconst isValidEmail = (email) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(email || '').trim());\nconst now = new Date();\nconst minDaysBetweenTouches = Number($env.MIN_DAYS_BETWEEN_TOUCHES || 7);\nconst rows = items.map((item) => item.json);\nconst dedupe = new Set();\n\nconst eligible = [];\nfor (const row of rows) {\n  const email = String(row.email || '').trim().toLowerCase();\n  const status = String(row.status || 'new').trim().toLowerCase();\n  const unsubscribed = isTruthy(row.unsubscribed);\n  const bounced = isTruthy(row.bounced);\n  const replied = isTruthy(row.replied);\n\n  if (!email || !isValidEmail(email)) continue;\n  if (unsubscribed || bounced || replied) continue;\n  if (!['new', 'retry'].includes(status)) continue;\n  if (dedupe.has(email)) continue;\n\n  const nextSendAt = row.next_send_at ? new Date(row.next_send_at) : null;\n  if (nextSendAt && !Number.isNaN(nextSendAt.getTime()) && nextSendAt > now) continue;\n\n  const lastContactedAt = row.last_contacted_at ? new Date(row.last_contacted_at) : null;\n  if (lastContactedAt && !Number.isNaN(lastContactedAt.getTime())) {\n    const diffDays = (now.getTime() - lastContactedAt.getTime()) / (1000 * 60 * 60 * 24);\n    if (diffDays < minDaysBetweenTouches) continue;\n  }\n\n  dedupe.add(email);\n  eligible.push({\n    ...row,\n    email,\n    status,\n    domain: String(row.domain || email.split('@')[1] || '').trim().toLowerCase()\n  });\n}\n\neligible.sort((a, b) => Number(b.priority_score || 0) - Number(a.priority_score || 0));\nreturn eligible.map((row) => ({ json: row }));"
+      },
+      "id": "29a67f72-4806-475a-9279-ed3533ca28e0",
+      "name": "Filter Eligible Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -740,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const dailyLimit = Number($env.DAILY_OUTREACH_LIMIT || 20);\nconst selected = items.slice(0, dailyLimit);\nreturn selected;"
+      },
+      "id": "42f871eb-8f06-4fb6-8fed-0df0f10f8258",
+      "name": "Limit To Daily Cap",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "4a90f3c2-7614-47d2-b37d-536e5625f7d1",
+      "name": "Send One By One",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -300,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.website_url ? $json.website_url : ('https://' + $json.domain) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; RelayAIOutreachBot/1.0)"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "string"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "63f1f17f-4385-4e8f-8ef2-67fc9f318ec7",
+      "name": "Fetch Business Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -80,
+        120
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $item(0).$node['Send One By One'].json;\nconst raw = String($json.body || $json.data || $json.response || '');\nconst withoutScript = raw.replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ');\nconst text = withoutScript.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 5000);\n\nreturn [{\n  json: {\n    ...lead,\n    website_text: text || '',\n    research_summary: text ? text.slice(0, 1200) : ''\n  }\n}];"
+      },
+      "id": "d25fef24-34a2-4ca6-90fe-f8f23da872d8",
+      "name": "Build Research Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        140,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{$env.ANTHROPIC_API_KEY}}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-3-5-sonnet-latest\",\n  \"max_tokens\": 900,\n  \"temperature\": 0.5,\n  \"system\": \"You are an expert B2B SDR writing plain-text cold emails for Australian SMB outreach. Return only valid JSON with keys: subject, body, pain_point, cta. The body must: (1) be 70-120 words, (2) include one concrete observation from website text if available, (3) avoid hype, (4) include a soft CTA, (5) never fabricate claims.\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Lead details: \\\\nfirst_name={{$json.first_name || ''}}\\\\ncompany={{$json.company || ''}}\\\\nrole={{$json.title || ''}}\\\\nindustry={{$json.industry || ''}}\\\\nlocation={{$json.location || ''}}\\\\ndomain={{$json.domain || ''}}\\\\nwebsite_text_snippet={{$json.research_summary || ''}}\\\\n\\\\nWrite one personalized cold email JSON now.\"\n    }\n  ]\n}"
+      },
+      "id": "2d0cecd2-a4ab-4766-8d55-10f6e4ad9fdf",
+      "name": "Claude - Generate Outreach",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        360,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $item(0).$node['Build Research Context'].json;\nconst response = $json;\nconst text = response?.content?.[0]?.text || '{}';\nlet parsed;\n\ntry {\n  parsed = JSON.parse(text);\n} catch (e) {\n  parsed = {\n    subject: `Quick question about ${lead.company || lead.domain || 'your business'}`,\n    body: `Hi ${lead.first_name || ''},\\n\\nI work with Australian businesses to automate repetitive admin tasks and improve response times to new enquiries. If helpful, I can share a few practical ideas based on ${lead.company || 'your business'} and your current setup.\\n\\nWould a quick 15-minute chat next week be useful?`,\n    pain_point: '',\n    cta: 'Would a quick 15-minute chat next week be useful?'\n  };\n}\n\nconst unsubscribe = `${$env.UNSUBSCRIBE_BASE_URL || 'https://YOUR_DOMAIN/unsubscribe'}?email=${encodeURIComponent(lead.email)}`;\nconst signature = `\\n\\nBen\\nRelayAI | Business Automation\\nrelayai.com.au\\nABN: 46 873 536 821\\nUnsubscribe: ${unsubscribe}`;\n\nconst bodyText = String(parsed.body || '').trim();\nconst sanitizedBody = bodyText.replace(/unsubscrib(e|ing).*$/gim, '').trim();\n\nreturn [{\n  json: {\n    ...lead,\n    subject: String(parsed.subject || `Quick question about ${lead.company || lead.domain || 'your business'}`).slice(0, 120),\n    body: `${sanitizedBody}${signature}`,\n    outreach_status: 'draft_ready',\n    generated_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "b190b5f7-e8ea-45db-aef0-8d2867bd846f",
+      "name": "Parse + Compliance Footer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    ...$json,\n    outreach_status: 'draft_ready',\n    draft_created_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "fb66d942-d3a0-4f53-b2ac-f6e4fdfe0f94",
+      "name": "Create Draft (Resend Marker)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        120
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"{{$env.RESEND_FROM_EMAIL || 'ben@getrelayai.com.au'}}\",\n  \"to\": \"{{$json.email}}\",\n  \"subject\": \"{{$json.subject}}\",\n  \"text\": \"{{$json.body}}\"\n}",
+        "options": {}
+      },
+      "id": "01ddd40b-5a8d-4328-a84f-cf56e0723586",
+      "name": "Send Email (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1020,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 90) + 30 }}",
+        "unit": "seconds"
+      },
+      "id": "f1c4ef42-d32d-4404-bf42-ec426adf90f7",
+      "name": "Random Delay",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1240,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id": "={{$json.lead_id}}",
+            "status": "sent",
+            "last_contacted_at": "={{$now}}",
+            "outreach_date": "={{$now}}",
+            "sequence_step": "={{ Number($json.sequence_step || 0) + 1 }}",
+            "last_subject": "={{$json.subject}}",
+            "last_body": "={{$json.body}}",
+            "next_send_at": "={{ new Date(Date.now() + (3 * 24 * 60 * 60 * 1000)).toISOString() }}",
+            "updated_at": "={{$now}}"
+          }
+        },
+        "matchingColumns": [
+          "lead_id"
+        ],
+        "options": {}
+      },
+      "id": "9dcff1e5-57a7-4f49-9d5a-1f2bf4a30c41",
+      "name": "Update Sheet Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1460,
+        120
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily Outreach Schedule": {
+      "main": [
+        [
+          {
+            "node": "Read Leads From Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Leads From Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter Eligible Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Eligible Leads": {
+      "main": [
+        [
+          {
+            "node": "Limit To Daily Cap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit To Daily Cap": {
+      "main": [
+        [
+          {
+            "node": "Send One By One",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send One By One": {
+      "main": [
+        [
+          {
+            "node": "Fetch Business Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Business Website": {
+      "main": [
+        [
+          {
+            "node": "Build Research Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Research Context": {
+      "main": [
+        [
+          {
+            "node": "Claude - Generate Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude - Generate Outreach": {
+      "main": [
+        [
+          {
+            "node": "Parse + Compliance Footer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse + Compliance Footer": {
+      "main": [
+        [
+          {
+            "node": "Create Draft (Resend Marker)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft (Resend Marker)": {
+      "main": [
+        [
+          {
+            "node": "Send Email (Resend)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email (Resend)": {
+      "main": [
+        [
+          {
+            "node": "Random Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Delay": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sheet Status": {
+      "main": [
+        [
+          {
+            "node": "Send One By One",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "53fe1855-6bd0-4afd-b90f-178ef1535d37",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "relayai-outreach-template-001",
+  "tags": [
+    {
+      "name": "relayai-internal"
+    },
+    {
+      "name": "outreach"
+    }
+  ]
+}

@@ -21,6 +21,7 @@ Each file is a JSON export that can be imported directly into n8n.
 | `accounting/` | Xero-triggered workflows (invoices, payments) |
 | `scheduling/` | Appointment reminders and booking confirmations |
 | `notifications/` | Generic alerting workflows (Slack, email) |
+| `outreach/` | Outbound lead sequencing, personalization, and send workflows |
 | `allied-health/` | Workflows specific to physio/OT/psychology practices |
 
 ## Template index
@@ -37,6 +38,7 @@ Each file is a JSON export that can be imported directly into n8n.
 | `scheduling/new-booking-welcome-email.json` | Calendly booking webhook | Send welcome email | All |
 | `notifications/web-form-to-email-slack.json` | Webhook (web form POST) | Email + Slack notification | All |
 | `notifications/google-sheets-row-to-slack.json` | Google Sheets — new row | Slack notification | All |
+| `outreach/apollo-qualified-leads-to-neo-claude.json` | Cron (weekdays) | Personalize + draft + send cold outreach + update sheet | Internal outbound |
 | `allied-health/new-patient-welcome-sequence.json` | Webhook / Splose | Welcome email sequence | Allied health |
 | `allied-health/recall-reminder.json` | Cron (weekly) | Email/SMS recall reminder | Allied health |
 
