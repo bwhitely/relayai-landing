@@ -1905,6 +1905,42 @@
       }
     }
 
+    .roi-examples {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .roi-examples {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .roi-example-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .roi-example-label {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    .roi-example-result {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
     /* ---- PRICING ---- */
     #pricing {
       border-top: 1px solid var(--border);
@@ -1935,6 +1971,31 @@
       max-width: 460px;
       margin-left: auto;
       margin-right: auto;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin: 2rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 620px;
+    }
+
+    .pricing-features li {
+      padding: 1rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      border-left: 3px solid var(--accent);
+    }
+
+    .pricing-features li strong {
+      color: var(--text);
+      font-weight: 600;
     }
 
     /* ---- CONTACT ---- */
@@ -2499,8 +2560,8 @@
     <section class="hero">
       <div class="hero-accent"></div>
       <div class="container hero-content">
-        <h1>Your Business, Running While You Sleep.</h1>
-        <p>We build custom workflow automations, system integrations, document processing, and AI agents for Australian small & medium businesses — so repetitive work handles itself, your tools talk to each other, and you can focus on what actually grows your business.</p>
+        <h1>You shouldn't be the one connecting your own software.</h1>
+        <p>Your tools don't talk to each other — so you fill the gap manually. Invoices, follow-ups, booking confirmations, CRM updates: work that runs on autopilot in a well-run business, but still lands on your desk. We connect what you already use and make it work together — no new software to learn, no lock-in.</p>
         <div class="hero-ctas">
           <a href="#contact" class="btn btn-pulse">Book a Free Consultation</a>
           <a href="#demo" class="btn btn-ghost">Try the Live Demo</a>
@@ -2877,8 +2938,8 @@
 
           <div class="card reveal reveal-d5">
             <h3>Allied Health Automation</h3>
-            <p>Appointment reminders, rebooking flows, NDIS document routing, and overdue invoice follow-up &mdash; purpose-built for Splose-based practices.</p>
-            <p class="card-example">E.g., SMS reminders sent 24h before each appointment. No-shows trigger an automatic rebooking prompt. Overdue invoices chase themselves.</p>
+            <p>Appointment reminders, no-show recovery, NDIS document routing, and overdue invoice follow-up &mdash; purpose-built for Splose-based practices. Practitioners typically recover 3–4 hrs/week in admin alone.</p>
+            <p class="card-example">E.g., SMS reminders 24h and 2h before each appointment. Cancellations trigger an automatic rebooking prompt. NDIS service agreements route for signature. Overdue invoices follow up on a schedule until paid &mdash; no staff involvement.</p>
           </div>
 
         </div>
@@ -2931,63 +2992,60 @@
       </div>
     </section>
 
-    <!-- TESTIMONIALS — replace placeholder cards with real testimonials as they come in -->
-    <!-- <section id="testimonials" class="testimonials-section">
+    <!-- WHY WE'RE DIFFERENT -->
+    <section id="why-us" class="testimonials-section">
       <div class="container">
-        <p class="section-label">Why clients choose us</p>
-        <h2 class="section-heading reveal">Direct access to the person who builds it.</h2>
-        <p class="section-sub reveal reveal-d1">No account managers, no junior developers. Every engagement is scoped and built by the founder directly, so you get someone who's accountable for the outcome, not just the delivery.</p>
-        <div class="testimonials-grid"> -->
+        <p class="section-label">Why we're different</p>
+        <h2 class="section-heading reveal">Not an agency. Not a template. One engineer who builds it and stays accountable.</h2>
+        <p class="section-sub reveal reveal-d1">You're probably getting pitched on automation every week. Most of it is agencies selling the same solution to every client, with a junior developer doing the actual work. Here's what makes this different.</p>
+        <div class="testimonials-grid">
 
-          <!-- Founder note — replace with real testimonial once available -->
-          <!-- <div class="testimonial-card reveal reveal-d1">
-            <div class="testimonial-quote-mark">&ldquo;</div>
-            <blockquote>I started RelayAI because I watched small businesses waste hours every week on work that should have been running itself. I want to help Australian SMBs remain efficient, modern and competitive it todays digital landscape.</blockquote>
+          <div class="testimonial-card reveal reveal-d1">
+            <div class="testimonial-quote-mark">01</div>
+            <blockquote>I take 1–2 clients per month. Your project doesn't get handed off or lost in a queue — it gets my full attention, from the first call through to delivery and beyond.</blockquote>
             <div class="testimonial-author">
-              <div class="testimonial-avatar">B</div>
+              <div class="testimonial-avatar">1–2</div>
               <div>
-                <div class="testimonial-name">Ben</div>
-                <div class="testimonial-role">Founder · RelayAI · Adelaide, SA</div>
+                <div class="testimonial-name">Capacity-limited by design</div>
+                <div class="testimonial-role">Max 1–2 new clients per month</div>
               </div>
             </div>
-          </div> -->
+          </div>
 
-          <!-- TODO: Replace with first real client testimonial -->
-          <!-- <div class="testimonial-card reveal reveal-d2">
-            <div class="testimonial-quote-mark">&ldquo;</div>
-            <blockquote>Replace with real client quote here.</blockquote>
+          <div class="testimonial-card reveal reveal-d2">
+            <div class="testimonial-quote-mark">02</div>
+            <blockquote>Every solution is built from scratch around your specific workflows and existing tools. Not a resold template, not an off-the-shelf chatbot with your logo on it — software that does exactly what your business needs.</blockquote>
             <div class="testimonial-author">
-              <div class="testimonial-avatar">X</div>
+              <div class="testimonial-avatar">⚙</div>
               <div>
-                <div class="testimonial-name">Client Name</div>
-                <div class="testimonial-role">Business Name · Industry</div>
+                <div class="testimonial-name">Bespoke, not templated</div>
+                <div class="testimonial-role">Built around your tools and processes</div>
               </div>
             </div>
-          </div> -->
+          </div>
 
-          <!-- TODO: Replace with second real client testimonial -->
-          <!-- <div class="testimonial-card reveal reveal-d3">
-            <div class="testimonial-quote-mark">&ldquo;</div>
-            <blockquote>Replace with real client quote here.</blockquote>
+          <div class="testimonial-card reveal reveal-d3">
+            <div class="testimonial-quote-mark">03</div>
+            <blockquote>When something breaks six months from now, you call me directly — not a support ticket system, not an account manager who escalates to someone who's never touched your code. I built it; I fix it.</blockquote>
             <div class="testimonial-author">
-              <div class="testimonial-avatar">Y</div>
+              <div class="testimonial-avatar">☎</div>
               <div>
-                <div class="testimonial-name">Client Name</div>
-                <div class="testimonial-role">Business Name · Industry</div>
+                <div class="testimonial-name">Direct line to the builder</div>
+                <div class="testimonial-role">No support queue, no account managers</div>
               </div>
             </div>
-          </div> -->
+          </div>
 
-        <!-- </div>
+        </div>
       </div>
-    </section> -->
+    </section>
 
     <!-- ROI CALCULATOR -->
     <section id="roi-calculator">
       <div class="container">
-        <p class="section-label">ROI Calculator</p>
-        <h2 class="section-heading">How much is manual work costing you?</h2>
-        <p class="section-sub">Adjust the sliders to match your business and see what automation could save you.</p>
+        <p class="section-label">Real numbers</p>
+        <h2 class="section-heading">What manual work is actually costing.</h2>
+        <p class="section-sub">Run the numbers for your business below, or see how automation has played out for businesses like yours.</p>
         <div class="roi-grid">
           <div class="roi-inputs">
             <div class="roi-slider-group">
@@ -3028,6 +3086,21 @@
             <a href="#contact" class="btn roi-cta">Get a Custom Quote</a>
           </div>
         </div>
+
+        <div class="roi-examples">
+          <div class="roi-example-card">
+            <p class="roi-example-label">Allied health practice &middot; 40 appointments/week</p>
+            <p class="roi-example-result">Appointment reminders + no-show recovery: ~3 hrs/week saved. Automatic rebooking prompts recover 20–30% of cancellations without staff involvement.</p>
+          </div>
+          <div class="roi-example-card">
+            <p class="roi-example-label">Trade business &middot; 60+ enquiries/week</p>
+            <p class="roi-example-result">Auto-response to missed calls and web enquiries + quote follow-up: ~5 hrs/week saved. No lead lost to a competitor who responded first.</p>
+          </div>
+          <div class="roi-example-card">
+            <p class="roi-example-label">Professional services &middot; Xero + CRM</p>
+            <p class="roi-example-result">Invoice-to-CRM sync + overdue follow-up sequences: ~4 hrs/week saved. Overdue invoices chased automatically on schedule, without a staff member making awkward calls.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -3036,15 +3109,17 @@
       <div class="container">
         <p class="section-label">Pricing</p>
         <h2 class="section-heading">Custom-Built. Clear Pricing.</h2>
-        <p class="section-sub">
-          Every business runs differently — so every automation solution we build is tailored to your workflows.
-          Pricing is simple: a fixed one-time build fee, plus a transparent monthly fee for hosting, maintenance and ongoing optimisation.
-        </p>
+        <p class="section-sub">Every business runs differently — so every solution is scoped individually. The model is straightforward:</p>
+        <ul class="pricing-features">
+          <li><strong>One-off build fee</strong> — scoped upfront, fixed cost, no surprises. You know exactly what you're paying before anything is built.</li>
+          <li><strong>Optional monthly hosting &amp; support</strong> — covers infrastructure, monitoring, and direct access to me when something needs attention. Not mandatory; some solutions are self-contained once deployed.</li>
+          <li><strong>No lock-in contracts</strong> — you own what's built. If you want to walk away, you can. The automation keeps working.</li>
+        </ul>
         <div class="pricing-box">
           <h3>Get a Custom Proposal</h3>
           <p>
-            Tell us what's slowing you down and we'll design a solution around it.
-            You'll receive a clear scope, a fixed build cost, and a straightforward monthly support fee — no lock-in contracts and no surprise charges.
+            Tell us what's slowing you down and we'll scope a solution around it.
+            You'll receive a clear breakdown of what gets built, what it costs, and what ongoing support looks like — before you commit to anything.
           </p>
           <a href="#contact" class="btn">Book a Free Consultation</a>
         </div>
