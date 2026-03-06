@@ -4127,17 +4127,7 @@
         }, isFirst ? 0 : 450);
       }
 
-      if ('IntersectionObserver' in window) {                                                                                                                     
-        var termObs = new IntersectionObserver(function (entries) {                                                                                               
-          if (entries[0].isIntersecting) {                                                                                                                        
-            run();                                                                                                                                         
-        termObs.disconnect();                                                                                                                          
-          }                                                                                                                                                
-        }, { threshold: 0.1 });                                                                                                                            
-        termObs.observe(terminal);                                                                                                                         
-      } else {                                                                                                                                             
-        run();                                                                                                                                             
-      } 
+      run();
     })();
 
     // ---- GA EVENT TRACKING ----
