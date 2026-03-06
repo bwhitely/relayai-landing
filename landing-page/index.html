@@ -3884,49 +3884,6 @@
       }
     })();
 
-    // ---- ROI CALCULATOR ----
-    (function () {
-      var enquiriesEl = document.getElementById('roi-enquiries');
-      var minutesEl   = document.getElementById('roi-minutes');
-      var rateEl      = document.getElementById('roi-rate');
-
-      function update() {
-        var enquiries = +enquiriesEl.value;
-        var minutes   = +minutesEl.value;
-        var rate      = +rateEl.value;
-
-        document.getElementById('roi-enquiries-val').textContent = enquiries;
-        document.getElementById('roi-minutes-val').textContent   = minutes + ' min';
-        document.getElementById('roi-rate-val').textContent      = '$' + rate;
-
-        var hoursPerMonth  = (enquiries * 4.33 * minutes) / 60;
-        var costPerMonth   = hoursPerMonth * rate;
-        var automationLow  = 50;
-        var automationHigh = 150;
-        var savingLow      = Math.max(0, costPerMonth - automationHigh);
-        var savingHigh     = Math.max(0, costPerMonth - automationLow);
-        var paybackMonths  = costPerMonth > 0 ? (automationHigh / costPerMonth) : 0;
-
-        document.getElementById('roi-hours').textContent  = Math.round(hoursPerMonth) + ' hrs';
-        document.getElementById('roi-cost').textContent   = '$' + Math.round(costPerMonth).toLocaleString();
-
-        if (savingHigh <= 0) {
-          document.getElementById('roi-saving').textContent     = 'Talk to us';
-          document.getElementById('roi-saving-sub').textContent = 'Your volume may suit a lower-tier plan';
-        } else {
-          document.getElementById('roi-saving').textContent     = '$' + Math.round(savingLow).toLocaleString() + ' – $' + Math.round(savingHigh).toLocaleString();
-        }
-
-        var paybackText = paybackMonths < 1 ? 'Under 1 month' : Math.round(paybackMonths) + ' month' + (Math.round(paybackMonths) > 1 ? 's' : '');
-        document.getElementById('roi-payback').textContent = paybackText;
-      }
-
-      [enquiriesEl, minutesEl, rateEl].forEach(function (el) {
-        el.addEventListener('input', update);
-      });
-      update();
-    })();
-
     // ---- HERO TERMINAL ANIMATION ----
     (function () {
       var terminal = document.getElementById('heroTerminal');
